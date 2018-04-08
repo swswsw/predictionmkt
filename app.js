@@ -5,16 +5,26 @@ let initMarket1 = {
   id: 1, // market id
   phase: "start",
   bets: [],
+  oracles: [], // list of approved oracles when market is created
+  oracleOutcome: 0, // for hackathon, we only have one oracle, so we makes it simple.
+                    // just one single result.  outcome is specified by 1, 2, ....
+                    // 0 indicate no outcome yet
+  //oracleOutcomes: [], // when oracle pushes the result, it is stored here.
+  // tokens: [
+  //
+  // ]
   payoutRatio: 1.5,
 
-
 }
+
+//
 
 /*
 format of bets
 {
-user: "alice"// should be an address
-bet: 3 // may allow multi token later
+type: "bet",
+user: "alice", // should be an address
+amount: 3, // may allow multi token later
 outcome: 1, // user bets on outcome 1,2,3, or...
 
 }
@@ -22,16 +32,15 @@ outcome: 1, // user bets on outcome 1,2,3, or...
 
 let app = lotion({
   initialState: {
-    market: {
-      id: 1,
-
-    }
+    market1: initMarket1
   },
   devMode: true
 })
 
-app.use(txHandler1)
-app.use(txHandler2)
+app.use(txHandler1);
+app.use(txHandler2);
+app.use(txBetHandler);
+app.use(txOracleHandler);
 
 app.listen(3000).then(function(appInfo) {
   console.log(appInfo);
@@ -39,13 +48,39 @@ app.listen(3000).then(function(appInfo) {
 
 
 function txHandler1(state, tx, chainInfo) {
-  //state.count++;
+  console.log("tx: ", tx);
+  //console.log(chainInfo);
 }
 
 function txHandler2(state, tx, chainInfo) {
-  console.log(tx);
+  console.log("block height: ", chainInfo.height);
 }
 
+function txBetHandler(state, tx, chainInfo) {
+  if (tx.type === "bet") {
+    let cloned = Object.assign({}, tx);
+    console.log("bet: ", cloned);
+    state.market1.bets.push(cloned);
+    console.log("bets: ", state.market1.bets);
+  }
+}
+
+function txOracleHandler(state, tx, chainInfo) {
+  if (tx.type === "oracle") {
+    console.log("should check oracle identity, but that checking is skipped for hackathon.");
+    let cloned = Object.assign({}, tx);
+    console.log("oracle outcome: ", cloned);
+    state.market1.oracleOutcome = tx.outcome;
+    console.log("oracleOutcome: ", state.market1.oracleOutcome);
+  }
+}
+
+function txChallengePhase(state, tx, chainInfo) {
+  if (tx.type === "challenge") {
+    console.log("should check challenger actually owns the staking tokens");
+
+  }
+}
 /*
 
 prediction market
@@ -57,7 +92,7 @@ prediction market
 3. someone bets (record them)
 4. market closes (by time)
 
-** resolve phase **
+** oracle phase **
 condition to enter phase: time
 10. get data from oracle
 11. determine the result and record it
@@ -82,4 +117,7 @@ if (challenged)
 distribute coins according to result
 condition to end phase: when everything in the phase is executed
 
+
+** other info **
+time is not actual time.  it is block height
 */
