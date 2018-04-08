@@ -170,27 +170,36 @@ function txDistributeHandler(state, tx, chainInfo) {
 
       // sum up voting pool.
       // give it to the winners proportionally.
-      // for demo purpose, just give all the pool to alice
       let voteRecords = state.market1.voteRecords;
+      console.log("1");
       let votePoolTotal = 0;
       for (let i = 0; i < voteRecords.length; i++) {
         let vote = voteRecords[i];
-        let result = {};
+        //let result = {};
         //result[vote.outcome] =
+        console.log("vote amount", vote.amount);
         votePoolTotal += vote.amount;
       }
+      console.log("votePoolTotal: ", votePoolTotal);
       //votePoolTotal = votePoolTotal + state.market1.challenge.amount;
-      state.balances['alice'] += votePoolTotal;
+      // for demo purpose, just give all the pool to alice
       // sorry, demo only code here.
+      state.balances['alice'] += votePoolTotal;
+      console.log("distributed vote pool");
     }
 
     // distribute the original bet pool to the people
+    console.log("5");
     let betPoolTotal = 0;
+    let bets = state.market1.bets;
     for (let j = 0; j < bets.length; j++) {
+      console.log("6");
       let bet = bets[j];
       betPoolTotal += bet.amount;
     }
+    console.log("10");
     state.balances['alice'] += betPoolTotal;
+    console.log("11");
 
 
     // if (challenged)
