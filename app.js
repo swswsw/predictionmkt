@@ -94,6 +94,10 @@ function txBetHandler(state, tx, chainInfo) {
   if (tx.type === "bet") {
     let cloned = Object.assign({}, tx);
     console.log("bet: ", cloned);
+    let user = cloned.user;
+    let amount = cloned.amount;
+    // lock up their staking tokens
+    state.balances[user] = state.balances[user] - amount;
     state.market1.bets.push(cloned);
     console.log("bets: ", state.market1.bets);
   }
@@ -175,13 +179,18 @@ function txDistributeHandler(state, tx, chainInfo) {
         //result[vote.outcome] =
         votePoolTotal += vote.amount;
       }
-      votePoolTotal = votePoolTotal + state.market1.challenge.amount;
+      //votePoolTotal = votePoolTotal + state.market1.challenge.amount;
       state.balances['alice'] += votePoolTotal;
       // sorry, demo only code here.
     }
 
     // distribute the original bet pool to the people
-    //state.balances['alice'] += 100;
+    let betPoolTotal = 0;
+    for (let j = 0; j < bets.length; j++) {
+      let bet = bets[j];
+      betPoolTotal += bet.amount;
+    }
+    state.balances['alice'] += betPoolTotal;
 
 
     // if (challenged)
