@@ -34,7 +34,11 @@ condition to end phase: when everything in the phase is executed
 
 
 
+** note **
 
+the time of the phase is indicated by block time.  since we have finality, the
+phase start and stop block can be next to each other.  in other ledger that
+lacks finality, we should reserve more time (several blocks) between each phase.  
 
 
 run
@@ -43,8 +47,16 @@ run
 
 test code:
 
-> curl -X POST http://localhost:3000/txs -d '{"type": "bet", "outcome": 1, "amount": 3, "user": "alice"}'
+> curl -X POST http://localhost:3000/txs -d '{"type": "bet", "outcome": 1, "amount": 10, "user": "alice"}'
+
+curl -X POST http://localhost:3000/txs -d '{"type": "bet", "outcome": 1, "amount": 10, "user": "bob"}'
 
 > curl -X POST http://localhost:3000/txs -d '{"type": "oracle", "outcome": 2}'
 
 curl -X POST http://localhost:3000/txs -d '{"type": "challenge", "user": "alice", "amount": 100}'
+
+curl -X POST http://localhost:3000/txs -d '{"type": "vote", "user": "alice", "amount": 1000, "outcome": 1}'
+
+curl -X POST http://localhost:3000/txs -d '{"type": "vote", "user": "bob", "amount": 10, "outcome": 2}'
+
+curl -X POST http://localhost:3000/txs -d '{"type": "vote", "user": "carol", "amount": 1000, "outcome": 1}'
