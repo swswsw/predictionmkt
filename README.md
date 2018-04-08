@@ -60,3 +60,5 @@ curl -X POST http://localhost:3000/txs -d '{"type": "vote", "user": "alice", "am
 curl -X POST http://localhost:3000/txs -d '{"type": "vote", "user": "bob", "amount": 10, "outcome": 2}'
 
 curl -X POST http://localhost:3000/txs -d '{"type": "vote", "user": "carol", "amount": 1000, "outcome": 1}'
+
+curl -X POST http://localhost:3000/txs -d '{"type": "distribute"}'

@@ -7,7 +7,7 @@ let initMarket1 = {
   phase: "start",
   bets: [],
   oracles: [], // list of approved oracles when market is created
-  oracleOutcome: 0, // for hackathon, we only have one oracle, so we makes it simple.
+  oracleOutcome: -1, // for hackathon, we only have one oracle, so we makes it simple.
                     // just one single result.  outcome is specified by 1, 2, ....
                     // 0 indicate no outcome yet
   //oracleOutcomes: [], // when oracle pushes the result, it is stored here.
@@ -57,6 +57,9 @@ format of vote
   amount: 1000,
   outcome: 1,
 }
+
+format of distribute
+{type: "distribute"}
 */
 
 let app = lotion({
@@ -70,6 +73,7 @@ app.use(txBetHandler);
 app.use(txOracleHandler);
 app.use(txChallengeHandler);
 app.use(txVoteHandler);
+app.use(txDistributeHandler);
 
 
 app.listen(3000).then(function(appInfo) {
@@ -150,6 +154,45 @@ function updateVotes(outcome, amount) {
   console.log("6");
 }
 
+function txDistributeHandler(state, tx, chainInfo) {
+  if (tx.type === "distribute") {
+    // do final calculation and distribute the tokens accordingly.
+
+    // if challenge is there
+    if (Object.keys(state.market1.challenge).length > 0) {
+      // take the challenge pool + voting pool
+      // distribute to the winner of the voter who vote for it.
+      console.log("challenge was requested");
+
+      // sum up voting pool.
+      // give it to the winners proportionally.
+      // for demo purpose, just give all the pool to alice
+      let voteRecords = state.market1.voteRecords;
+      let votePoolTotal = 0;
+      for (let i = 0; i < voteRecords.length; i++) {
+        let vote = voteRecords[i];
+        let result = {};
+        //result[vote.outcome] =
+        votePoolTotal += vote.amount;
+      }
+      votePoolTotal = votePoolTotal + state.market1.challenge.amount;
+      state.balances['alice'] += votePoolTotal;
+      // sorry, demo only code here.
+    }
+
+    // distribute the original bet pool to the people
+    //state.balances['alice'] += 100;
+
+
+    // if (challenged)
+    //   update the final outcome according to voting results
+    //   distributed the staked coins (in challenge and vote phase) according to votign results.
+    // distribute coins according to result
+    // condition to end phase: when everything in the phase is executed
+
+    console.log("distribute done");
+  }
+}
 
 /*
 
