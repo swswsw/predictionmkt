@@ -1,6 +1,7 @@
 let lotion = require('lotion')
 
 // initial state
+// for demo purpose, we initialize the system with an opened prediction market.
 let initMarket1 = {
   id: 1, // market id
   phase: "start",
@@ -10,11 +11,18 @@ let initMarket1 = {
                     // just one single result.  outcome is specified by 1, 2, ....
                     // 0 indicate no outcome yet
   //oracleOutcomes: [], // when oracle pushes the result, it is stored here.
-  // tokens: [
-  //
-  // ]
+  challenge: {},
   payoutRatio: 1.5,
 
+}
+
+let initialState = {
+  market1: initMarket1,
+  balances: {
+    'alice': 10000,
+    'bob': 10000,
+    'carol': 10000,
+  },
 }
 
 //
@@ -24,16 +32,21 @@ format of bets
 {
 type: "bet",
 user: "alice", // should be an address
-amount: 3, // may allow multi token later
+amount: 100, // may allow multi token later
 outcome: 1, // user bets on outcome 1,2,3, or...
 
+}
+
+format of challenge
+{
+  type: "challenge",
+  user: "alice", // should be an address
+  amount: 100,
 }
 */
 
 let app = lotion({
-  initialState: {
-    market1: initMarket1
-  },
+  initialState: initialState,
   devMode: true
 })
 
@@ -41,6 +54,8 @@ app.use(txHandler1);
 app.use(txHandler2);
 app.use(txBetHandler);
 app.use(txOracleHandler);
+app.use(txChallengeHandler);
+
 
 app.listen(3000).then(function(appInfo) {
   console.log(appInfo);
@@ -69,18 +84,26 @@ function txOracleHandler(state, tx, chainInfo) {
   if (tx.type === "oracle") {
     console.log("should check oracle identity, but that checking is skipped for hackathon.");
     let cloned = Object.assign({}, tx);
-    console.log("oracle outcome: ", cloned);
-    state.market1.oracleOutcome = tx.outcome;
+    console.log("oracle tx: ", cloned);
+    state.market1.oracleOutcome = cloned.outcome;
     console.log("oracleOutcome: ", state.market1.oracleOutcome);
   }
 }
 
-function txChallengePhase(state, tx, chainInfo) {
+function txChallengeHandler(state, tx, chainInfo) {
   if (tx.type === "challenge") {
-    console.log("should check challenger actually owns the staking tokens");
-
+    console.log("should check that this is actually sent by the challenger.  and challenger's balance is fine");
+    let cloned = Object.assign({}, tx);
+    console.log("challenge tx: ", cloned);
+    let user = cloned.user;
+    let amount = cloned.amount;
+    state.balances[user] = state.balances[user] - amount;
+    state.market1.challenge = cloned;
+    console.log("challenge: ", state.market1.challenge);
   }
 }
+
+
 /*
 
 prediction market

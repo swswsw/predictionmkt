@@ -31,3 +31,20 @@ if (challenged)
   distributed the staked coins (in challenge and vote phase) according to votign results.
 distribute coins according to result
 condition to end phase: when everything in the phase is executed
+
+
+
+
+
+
+run
+> node app.js
+
+
+test code:
+
+> curl -X POST http://localhost:3000/txs -d '{"type": "bet", "outcome": 1, "amount": 3, "user": "alice"}'
+
+> curl -X POST http://localhost:3000/txs -d '{"type": "oracle", "outcome": 2}'
+
+curl -X POST http://localhost:3000/txs -d '{"type": "challenge", "user": "alice", "amount": 100}'
