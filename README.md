@@ -45,7 +45,9 @@ run
 > node app.js
 
 
-test code:
+test invocation:
+
+curl -X POST http://localhost:3000/txs -d '{"type": "start"}'
 
 curl -X POST http://localhost:3000/txs -d '{"type": "bet", "outcome": 1, "amount": 10, "user": "alice"}'
 

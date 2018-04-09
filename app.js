@@ -4,7 +4,7 @@ let lotion = require('lotion')
 // for demo purpose, we initialize the system with an opened prediction market.
 let initMarket1 = {
   id: 1, // market id
-  phase: "start",
+  phaseTime: {}, // the start and end time of each phase (time in blockheight)
   bets: [],
   oracles: [], // list of approved oracles when market is created
   oracleOutcome: -1, // for hackathon, we only have one oracle, so we makes it simple.
@@ -19,7 +19,6 @@ let initMarket1 = {
   //   outcome3: 0,
   // }, // aggregated result of vote
   payoutRatio: 1.5,
-
 }
 
 let initialState = {
@@ -34,6 +33,11 @@ let initialState = {
 //
 
 /*
+format of start tx
+{
+  type: "start",
+}
+
 format of bets
 {
 type: "bet",
@@ -69,6 +73,7 @@ let app = lotion({
 
 app.use(txHandler1);
 app.use(txHandler2);
+app.use(txStartHandler);
 app.use(txBetHandler);
 app.use(txOracleHandler);
 app.use(txChallengeHandler);
@@ -88,6 +93,20 @@ function txHandler1(state, tx, chainInfo) {
 
 function txHandler2(state, tx, chainInfo) {
   console.log("block height: ", chainInfo.height);
+}
+
+function txStartHandler(state, tx, chainInfo) {
+  if (tx.type === "start") {
+    // starting the market.
+    // calculate the phase time
+    let cloned = Object.assign({}, tx);
+    console.log("start: ", cloned);
+    let blockHeight = chainInfo.height;
+    var t1 = 1;
+    let phaseTime = calcPhaseTime(blockHeight);
+    state.market1.phaseTime = phaseTime;
+    console.log("phaseTime: ", state.market1.phaseTime);
+  }
 }
 
 function txBetHandler(state, tx, chainInfo) {
@@ -210,6 +229,33 @@ function txDistributeHandler(state, tx, chainInfo) {
 
     console.log("distribute done");
   }
+}
+
+/**
+ * return the start and end time for all phase.
+ */
+function calcPhaseTime(startingBlockHeight) {
+  // measured in number of blocks
+  const MARKET_DURATION = 3600;
+  const ORACLE_DURATION = 3600;
+  const CHALLENGE_DURATION = 3600;
+  const VOTE_DURATION = 3600;
+  const DISTRIBUTE_DURATION = 3600;
+
+  console.log("typeof ", typeof(startingBlockHeight))
+  let time = {};
+  time.marketStart = startingBlockHeight,
+  time.marketEnd = time.marketStart + MARKET_DURATION;
+  time.oracleStart = time.marketEnd + 1;
+  time.oracleEnd = time.oracleStart + ORACLE_DURATION;
+  time.challengeStart = time.oracleEnd + 1;
+  time.challengeEnd = time.challengeStart + CHALLENGE_DURATION;
+  time.voteStart = time.challengeEnd + 1;
+  time.voteEnd = time.voteStart + VOTE_DURATION;
+  time.distributeStart = time.voteEnd + 1;
+  time.distributeEnd = time.distributeStart + DISTRIBUTE_DURATION;
+
+  return time;
 }
 
 /*
