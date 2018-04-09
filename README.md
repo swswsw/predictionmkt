@@ -40,8 +40,8 @@ condition to enter phase: time
 ```
 if (challenged)
   update the final outcome according to voting results
-  distributed the staked coins (in challenge and vote phase) according to votign results.
-distribute coins according to result
+  distributed the staked coins in voting pool according to voting results.
+distribute betting pool coins according to outcome
 ```
 
 condition to end phase: when everything in the phase is executed
