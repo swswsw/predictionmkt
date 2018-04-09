@@ -36,10 +36,14 @@ condition to enter phase: challenge phase completed
 condition to enter phase: time
 
 40. determine the final outcome
+
+```
 if (challenged)
   update the final outcome according to voting results
   distributed the staked coins (in challenge and vote phase) according to votign results.
 distribute coins according to result
+```
+
 condition to end phase: when everything in the phase is executed
 
 
