@@ -111,55 +111,75 @@ function txStartHandler(state, tx, chainInfo) {
 
 function txBetHandler(state, tx, chainInfo) {
   if (tx.type === "bet") {
-    let cloned = Object.assign({}, tx);
-    console.log("bet: ", cloned);
-    let user = cloned.user;
-    let amount = cloned.amount;
-    // lock up their staking tokens
-    state.balances[user] = state.balances[user] - amount;
-    state.market1.bets.push(cloned);
-    console.log("bets: ", state.market1.bets);
+    // ignore request if it is outside of a particular phase timeframe
+    if (isInPhase(chainInfo.height, "market", state)) {
+      let cloned = Object.assign({}, tx);
+      console.log("bet: ", cloned);
+      let user = cloned.user;
+      let amount = cloned.amount;
+      // lock up their staking tokens
+      state.balances[user] = state.balances[user] - amount;
+      state.market1.bets.push(cloned);
+      console.log("bets: ", state.market1.bets);
+    } else {
+      console.log("wrong phase. bet can only be done in market phase.");
+    }
   }
 }
 
 function txOracleHandler(state, tx, chainInfo) {
   if (tx.type === "oracle") {
-    console.log("should check oracle identity, but that checking is skipped for hackathon.");
-    let cloned = Object.assign({}, tx);
-    console.log("oracle tx: ", cloned);
-    state.market1.oracleOutcome = cloned.outcome;
-    console.log("oracleOutcome: ", state.market1.oracleOutcome);
+    // ignore request if it is outside of a particular phase timeframe
+    if (isInPhase(chainInfo.height, "oracle", state)) {
+      console.log("should check oracle identity, but that checking is skipped for hackathon.");
+      let cloned = Object.assign({}, tx);
+      console.log("oracle tx: ", cloned);
+      state.market1.oracleOutcome = cloned.outcome;
+      console.log("oracleOutcome: ", state.market1.oracleOutcome);
+    } else {
+      console.log("wrong phase. oracle call can only be done in oracle phase.");
+    }
   }
 }
 
 function txChallengeHandler(state, tx, chainInfo) {
   if (tx.type === "challenge") {
-    console.log("skip challenger verification and balance verification for hackathon.");
-    let cloned = Object.assign({}, tx);
-    console.log("challenge tx: ", cloned);
-    let user = cloned.user;
-    let amount = cloned.amount;
-    // lock up their staking tokens
-    state.balances[user] = state.balances[user] - amount;
-    state.market1.challenge = cloned;
-    console.log("challenge: ", state.market1.challenge);
+    // ignore request if it is outside of a particular phase timeframe
+    if (isInPhase(chainInfo.height, "challenge", state)) {
+      console.log("skip challenger verification and balance verification for hackathon.");
+      let cloned = Object.assign({}, tx);
+      console.log("challenge tx: ", cloned);
+      let user = cloned.user;
+      let amount = cloned.amount;
+      // lock up their staking tokens
+      state.balances[user] = state.balances[user] - amount;
+      state.market1.challenge = cloned;
+      console.log("challenge: ", state.market1.challenge);
+    } else {
+      console.log("wrong phase. challenge call can only be done in challenge phase.");
+    }
   }
 }
 
 function txVoteHandler(state, tx, chainInfo) {
   if (tx.type === "vote") {
-    console.log("skip voter verification and balance verification for hackathon");
-    let cloned = Object.assign({}, tx);
-    console.log("vote tx", cloned);
-    let user = cloned.user;
-    let amount = cloned.amount;
-    let outcome = cloned.outcome;
-    // lock up their staking tokens
-    state.balances[user] = state.balances[user] - amount;
-    state.market1.voteRecords.push(cloned);
-    // update votes
-    //updateVotes(outcome, amount);
-    console.log("votes: ", state.market1.votes);
+    // ignore request if it is outside of a particular phase timeframe
+    if (isInPhase(chainInfo.height, "vote", state)) {
+      console.log("skip voter verification and balance verification for hackathon");
+      let cloned = Object.assign({}, tx);
+      console.log("vote tx", cloned);
+      let user = cloned.user;
+      let amount = cloned.amount;
+      let outcome = cloned.outcome;
+      // lock up their staking tokens
+      state.balances[user] = state.balances[user] - amount;
+      state.market1.voteRecords.push(cloned);
+      // update votes
+      //updateVotes(outcome, amount);
+      console.log("votes: ", state.market1.votes);
+    } else {
+      console.log("wrong phase. vote call can only be done in vote phase.");
+    }
   }
 }
 
@@ -179,55 +199,60 @@ function updateVotes(outcome, amount) {
 
 function txDistributeHandler(state, tx, chainInfo) {
   if (tx.type === "distribute") {
-    // do final calculation and distribute the tokens accordingly.
+    // ignore request if it is outside of a particular phase timeframe
+    if (isInPhase(chainInfo.height, "distribute", state)) {
+      // do final calculation and distribute the tokens accordingly.
 
-    // if challenge is there
-    if (Object.keys(state.market1.challenge).length > 0) {
-      // take the challenge pool + voting pool
-      // distribute to the winner of the voter who vote for it.
-      console.log("challenge was requested");
+      // if challenge is there
+      if (Object.keys(state.market1.challenge).length > 0) {
+        // take the challenge pool + voting pool
+        // distribute to the winner of the voter who vote for it.
+        console.log("challenge was requested");
 
-      // sum up voting pool.
-      // give it to the winners proportionally.
-      let voteRecords = state.market1.voteRecords;
-      console.log("1");
-      let votePoolTotal = 0;
-      for (let i = 0; i < voteRecords.length; i++) {
-        let vote = voteRecords[i];
-        //let result = {};
-        //result[vote.outcome] =
-        console.log("vote amount", vote.amount);
-        votePoolTotal += vote.amount;
+        // sum up voting pool.
+        // give it to the winners proportionally.
+        let voteRecords = state.market1.voteRecords;
+        console.log("1");
+        let votePoolTotal = 0;
+        for (let i = 0; i < voteRecords.length; i++) {
+          let vote = voteRecords[i];
+          //let result = {};
+          //result[vote.outcome] =
+          console.log("vote amount", vote.amount);
+          votePoolTotal += vote.amount;
+        }
+        console.log("votePoolTotal: ", votePoolTotal);
+        //votePoolTotal = votePoolTotal + state.market1.challenge.amount;
+        // for demo purpose, just give all the pool to alice
+        // sorry, demo only code here.
+        state.balances['alice'] += votePoolTotal;
+        console.log("distributed vote pool");
       }
-      console.log("votePoolTotal: ", votePoolTotal);
-      //votePoolTotal = votePoolTotal + state.market1.challenge.amount;
-      // for demo purpose, just give all the pool to alice
-      // sorry, demo only code here.
-      state.balances['alice'] += votePoolTotal;
-      console.log("distributed vote pool");
+
+      // distribute the original bet pool to the people
+      console.log("5");
+      let betPoolTotal = 0;
+      let bets = state.market1.bets;
+      for (let j = 0; j < bets.length; j++) {
+        console.log("6");
+        let bet = bets[j];
+        betPoolTotal += bet.amount;
+      }
+      console.log("10");
+      state.balances['alice'] += betPoolTotal;
+      console.log("11");
+
+
+      // if (challenged)
+      //   update the final outcome according to voting results
+      //   distributed the staked coins (in challenge and vote phase) according to votign results.
+      // distribute coins according to result
+      // condition to end phase: when everything in the phase is executed
+
+      console.log("distribute done");
+    } else {
+      console.log("wrong phase. distribute call can only be done in distribute phase.");
     }
-
-    // distribute the original bet pool to the people
-    console.log("5");
-    let betPoolTotal = 0;
-    let bets = state.market1.bets;
-    for (let j = 0; j < bets.length; j++) {
-      console.log("6");
-      let bet = bets[j];
-      betPoolTotal += bet.amount;
-    }
-    console.log("10");
-    state.balances['alice'] += betPoolTotal;
-    console.log("11");
-
-
-    // if (challenged)
-    //   update the final outcome according to voting results
-    //   distributed the staked coins (in challenge and vote phase) according to votign results.
-    // distribute coins according to result
-    // condition to end phase: when everything in the phase is executed
-
-    console.log("distribute done");
   }
 }
 
@@ -256,6 +281,36 @@ function calcPhaseTime(startingBlockHeight) {
   time.distributeEnd = time.distributeStart + DISTRIBUTE_DURATION;
 
   return time;
+}
+
+/**
+ * check if this blockheight is within a particular phase.
+ * @return [boolean]
+ */
+function isInPhase(blockHeight, phase, state) {
+  let result = false;
+  switch (phase) {
+    case "market":
+      result = blockHeight >= state.market1.phaseTime.marketStart && blockHeight <= state.market1.phaseTime.marketEnd;
+      break;
+    case "oracle":
+      result = blockHeight >= state.market1.phaseTime.oracleStart && blockHeight <= state.market1.phaseTime.oracleEnd;
+      break;
+    case "challenge":
+      result = blockHeight >= state.market1.phaseTime.challengeStart && blockHeight <= state.market1.phaseTime.challengeEnd;
+      break;
+    case "vote":
+      result = blockHeight >= state.market1.phaseTime.voteStart && blockHeight <= state.market1.phaseTime.voteEnd;
+      break;
+    case "distribute":
+      result = blockHeight >= state.market1.phaseTime.distributeStart && blockHeight <= state.market1.phaseTime.distributeEnd;
+      break;
+    default:
+      result = false;
+      break;
+  }
+
+  return result;
 }
 
 /*
