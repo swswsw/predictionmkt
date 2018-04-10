@@ -52,6 +52,10 @@ phase start and stop block can be next to each other.  in other ledger that
 lacks finality, we should reserve more time (several blocks) between each phase.  
 
 
+the distribute algorithm is not yet implemented correctly.
+
+
+
 run
 > node app.js
 
