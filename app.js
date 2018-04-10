@@ -176,14 +176,14 @@ function txVoteHandler(state, tx, chainInfo) {
       state.market1.voteRecords.push(cloned);
       // update votes
       //updateVotes(outcome, amount);
-      console.log("votes: ", state.market1.votes);
+      console.log("vote records: ", state.market1.voteRecords);
     } else {
       console.log("wrong phase. vote call can only be done in vote phase.");
     }
   }
 }
 
-function updateVotes(outcome, amount) {
+function updateVotes(outcome, amount, state) {
   console.log("1");
   let outcomeName = 'outcome' + outcome;
   console.log("2");
@@ -288,6 +288,11 @@ function calcPhaseTime(startingBlockHeight) {
  * @return [boolean]
  */
 function isInPhase(blockHeight, phase, state) {
+  // ***for demo and testing, don't check for timeframe of the phase ***
+  return true;
+  //
+
+
   let result = false;
   switch (phase) {
     case "market":
