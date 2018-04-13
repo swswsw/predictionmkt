@@ -161,22 +161,37 @@ function txChallengeHandler(state, tx, chainInfo) {
   }
 }
 
+/**
+ * check if challenge has been issued
+ * (if the state contains challenge info)
+ */
+function challenged(state) {
+  let obj = state.market1.challenge;
+  // check if challenge object is still empty
+  return !(Object.keys(obj).length === 0 && obj.constructor === Object)
+}
+
 function txVoteHandler(state, tx, chainInfo) {
   if (tx.type === "vote") {
     // ignore request if it is outside of a particular phase timeframe
     if (isInPhase(chainInfo.height, "vote", state)) {
       console.log("skip voter verification and balance verification for hackathon");
-      let cloned = Object.assign({}, tx);
-      console.log("vote tx", cloned);
-      let user = cloned.user;
-      let amount = cloned.amount;
-      let outcome = cloned.outcome;
-      // lock up their staking tokens
-      state.balances[user] = state.balances[user] - amount;
-      state.market1.voteRecords.push(cloned);
-      // update votes
-      //updateVotes(outcome, amount);
-      console.log("vote records: ", state.market1.voteRecords);
+      if (challenged(state)) {
+        let cloned = Object.assign({}, tx);
+        console.log("vote tx", cloned);
+        let user = cloned.user;
+        let amount = cloned.amount;
+        let outcome = cloned.outcome;
+        // lock up their staking tokens
+        state.balances[user] = state.balances[user] - amount;
+        state.market1.voteRecords.push(cloned);
+        // update votes
+        //updateVotes(outcome, amount);
+        console.log("vote records: ", state.market1.voteRecords);
+      } else {
+        console.log("do not accept vote if there is no challenge");
+      }
+
     } else {
       console.log("wrong phase. vote call can only be done in vote phase.");
     }
