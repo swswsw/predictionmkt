@@ -62,13 +62,13 @@ run
 
 test invocation:
 
-curl -X POST http://localhost:3000/txs -d '{"type": "start"}'
+> curl -X POST http://localhost:3000/txs -d '{"type": "start"}'
 
-curl -X POST http://localhost:3000/txs -d '{"type": "bet", "outcome": 1, "amount": 10, "user": "alice"}'
+> curl -X POST http://localhost:3000/txs -d '{"type": "bet", "outcome": 1, "amount": 10, "user": "alice"}'
 
 > curl -X POST http://localhost:3000/txs -d '{"type": "bet", "outcome": 1, "amount": 10, "user": "bob"}'
 
-curl -X POST http://localhost:3000/txs -d '{"type": "oracle", "outcome": 2}'
+> curl -X POST http://localhost:3000/txs -d '{"type": "oracle", "outcome": 2}'
 
 > curl -X POST http://localhost:3000/txs -d '{"type": "challenge", "user": "alice", "amount": 100}'
 
@@ -76,6 +76,6 @@ curl -X POST http://localhost:3000/txs -d '{"type": "oracle", "outcome": 2}'
 
 > curl -X POST http://localhost:3000/txs -d '{"type": "vote", "user": "bob", "amount": 10, "outcome": 2}'
 
-curl -X POST http://localhost:3000/txs -d '{"type": "vote", "user": "carol", "amount": 1000, "outcome": 1}'
+> curl -X POST http://localhost:3000/txs -d '{"type": "vote", "user": "carol", "amount": 1000, "outcome": 1}'
 
-curl -X POST http://localhost:3000/txs -d '{"type": "distribute"}'
+> curl -X POST http://localhost:3000/txs -d '{"type": "distribute"}'
