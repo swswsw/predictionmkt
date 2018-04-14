@@ -48,7 +48,7 @@ condition to end phase: when everything in the phase is executed
 
 
 
-## note **
+## note
 
 the time of the phase is indicated by block height.  since we have finality, the
 phase start and stop block can be next to each other.  in other ledger that
