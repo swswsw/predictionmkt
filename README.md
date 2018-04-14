@@ -1,13 +1,13 @@
-** prediction market **
+prediction market
 =======================
 
-## market phase **
+## market phase
 1. open new market
 2. allow bet
 3. someone bets (record them)
 4. market closes (by time)
 
-## resolve phase **
+## resolve phase
 
 condition to enter phase: time
 
@@ -16,20 +16,23 @@ condition to enter phase: time
 
 condition to end phase: time
 
-## challenge phase **
+## challenge phase
 
 condition to enter phase: time, someone triggers it
 
 20. someone stake their coin and challenges
+
 condition to end phase: time
 
-## vote phase **
+## vote phase
 
 condition to enter phase: challenge phase completed
 
 30. anyone can stake their coin and vote
 
-## distribute phase **
+condition to end phase: time
+
+## distribute phase
 condition to enter phase: time
 
 40. determine the final outcome
