@@ -48,6 +48,7 @@ condition to end phase: when everything in the phase is executed
 
 
 
+
 ## note
 
 the time of the phase is indicated by block height.  since we have finality, the
@@ -82,3 +83,6 @@ test invocation:
 > curl -X POST http://localhost:3000/txs -d '{"type": "vote", "user": "carol", "amount": 1000, "outcome": 1}'
 
 > curl -X POST http://localhost:3000/txs -d '{"type": "distribute"}'
+
+
+## update
