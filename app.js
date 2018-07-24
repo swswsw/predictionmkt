@@ -199,17 +199,13 @@ function txVoteHandler(state, tx, chainInfo) {
 }
 
 function updateVotes(outcome, amount, state) {
-  console.log("1");
   let outcomeName = 'outcome' + outcome;
-  console.log("2");
   // if (! (outcome in state.market1.votes) ) {
   //   console.log("3");
   //   state.market1.votes[outcomeName] = 0;
   //   console.log("4");
   // }
-  console.log("5");
   state.market1.votes[outcomeName] = state.market1.votes[outcomeName] + amount;
-  console.log("6");
 }
 
 function txDistributeHandler(state, tx, chainInfo) {
