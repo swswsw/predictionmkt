@@ -1,4 +1,5 @@
 let lotion = require('lotion')
+let BigNumber = require('bignumber.js'); // https://github.com/MikeMcl/bignumber.js/
 
 // initial state
 // for demo purpose, we initialize the system with an opened prediction market.
