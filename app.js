@@ -268,6 +268,159 @@ function txDistributeHandler(state, tx, chainInfo) {
   }
 }
 
+
+class LocalContractStorage {
+
+  constructor(state) {
+    this.state = state;
+  }
+
+  static setValue(key, value) {
+    // sets to the state.
+    // tbd
+  }
+}
+
+class Event {
+  // it is just log
+  static Trigger(keyword, string) {
+    console.log("[" + keyword + "] " + string);
+  }
+}
+
+class Blockchain {
+  constructor(state) {
+    this.state = state;
+  }
+  
+  /**
+   * transfer [amount] of tokens to [user]
+   * 
+   * @param {*} user 
+   * @param {*} amount 
+   * @return false if not successful.  return a transfer info object if successful.
+   */
+  static transfer(user, amount) {
+    // tbd
+    return {"success": true};
+  }
+}
+
+/**
+ * both vote and bet payout distribution logic are mostly the same.  we generalized them together.  
+ * @param {string} voteOrBet 
+ */
+function doPayout(voteOrBet, finalOutcome, bets, state) {
+  LocalContractStorage.state = state;
+
+  let keywords = {}; // keywords to multiplex between vote and bet
+  if (voteOrBet === "vote") {
+    keywords = {
+      //betsInfo: "votes",
+      distributionInfo: "voteDistribution",
+      payoutsInfo: "votePayouts",
+      eventKey: "votePayout",
+    }
+
+  } else {
+    keywords = {
+      //betsInfo: "bets",
+      distributionInfo: "distribution",
+      payoutsInfo: "payouts",
+      eventKey: "betPayout",
+    }
+  }
+
+  //let bets = LocalContractStorage.get(keywords.betsInfo);
+  //let finalOutcome = LocalContractStorage.get("finalOutcome");
+  let bet;
+  let user;
+  let amount;
+  let userOutcome;
+  let payoutAmount;
+  let betsIdx = 0;
+  let betPoolTotal = new BigNumber(0);
+  let winnerPoolTotal = new BigNumber(0);
+  let payouts = [];
+  let distribution = {
+    betPoolTotal: 0,
+    winnerPoolTotal: 0,
+  }
+
+  if (bets) {
+    Event.Trigger(keywords.eventKey, "bets: " + JSON.stringify(bets));
+
+    // calculate bet pool total and winner pool total amount.
+    // so we can calculate the payout based on ratio
+    // of user bet in the winning pool
+    for (betsIdx = 0; betsIdx < bets.length; betsIdx++) {
+      bet = bets[betsIdx];
+      Event.Trigger(keywords.eventKey, "bets[" + betsIdx + "]: " + JSON.stringify(bet));
+      user = bet.user;
+      amount = bet.amount;
+      userOutcome = bet.outcome;
+      betPoolTotal = betPoolTotal.plus(amount);
+      if (finalOutcome == userOutcome) {
+        // winner pool
+        winnerPoolTotal = winnerPoolTotal.plus(amount);
+      }
+    }
+
+    Event.Trigger(keywords.eventKey, "betPoolTotal: " + betPoolTotal + ", winnerPoolTotal: " + winnerPoolTotal);
+    console.log("betPoolTotal: " + betPoolTotal + ", winnerPoolTotal: " + winnerPoolTotal);
+    distribution.betPoolTotal = betPoolTotal;
+    distribution.winnerPoolTotal = winnerPoolTotal;
+    LocalContractStorage.setValue(keywords.distributionInfo, distribution);
+
+
+    for (betsIdx = 0; betsIdx < bets.length; betsIdx++) {
+      bet = bets[betsIdx];
+      Event.Trigger(keywords.eventKey, "bets[" + betsIdx + "]: " + JSON.stringify(bet));
+      user = bet.user;
+      amount = new BigNumber(bet.amount);
+      userOutcome = bet.outcome;
+      console.log("bet: ", bet);
+      // payout is user's bet in proportion to the entire pool.
+      // payout = ( userAmount / winnerPoolTotal ) * betPoolTotal
+      // todo: we might want to floor it to prevent multiple rounding to exceed the total payout
+      payoutAmount = amount.times(betPoolTotal).dividedBy(winnerPoolTotal);
+      Event.Trigger(keywords.eventKey, "payoutAmount: " + payoutAmount);
+      console.log("payoutAmount: ", payoutAmount);
+
+
+
+
+
+
+
+
+      if (finalOutcome == userOutcome) {
+        Event.Trigger(keywords.eventKey, "transfer " + payoutAmount + " to " + user);
+        console.log("transfer " + payoutAmount + " to " + user);
+        var payoutElem = {
+          user: user,
+          betAmount: amount,
+          payoutAmount: payoutAmount,
+        }
+        payouts.push(payoutElem);
+
+
+        var result = Blockchain.transfer(user, payoutAmount);
+        if (!result) {
+          Event.Trigger(keywords.eventKey, "transfer failed: " + payoutAmount + " to " + user);
+          console.log("transfer failed");
+          throw new Error("transfer failed.");
+        } else {
+          Event.Trigger(keywords.eventKey, "transfer result: " + JSON.stringify(result));
+        }
+      }
+    }
+
+    LocalContractStorage.setValue(keywords.payoutsInfo, payouts);
+    Event.Trigger(keywords.eventKey, "payouts: " + JSON.stringify(payouts));
+  }
+}
+
 /**
  * return the start and end time for all phase.
  */
