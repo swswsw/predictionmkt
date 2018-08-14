@@ -1,4 +1,4 @@
-let lotion = require('lotion')
+(function (exports, require, module, __filename, __dirname) { let lotion = require('lotion')
 let BigNumber = require('bignumber.js'); // https://github.com/MikeMcl/bignumber.js/
 
 // initial state
@@ -214,10 +214,13 @@ function txDistributeHandler(state, tx, chainInfo) {
     // ignore request if it is outside of a particular phase timeframe
     if (isInPhase(chainInfo.height, "distribute", state)) {
       // do final calculation and distribute the tokens accordingly.
+      
+      // finaloutcome is assumed to be oracleoutcome, unless there is a vote.
+      let finalOutcome = state.market1.oracleOutcome;
 
       // if challenge is there
       if (Object.keys(state.market1.challenge).length > 0) {
-        // take the challenge pool + voting pool
+        // get voting pool result
         // distribute to the winner of the voter who vote for it.
         console.log("challenge was requested");
 
@@ -235,23 +238,24 @@ function txDistributeHandler(state, tx, chainInfo) {
         }
         console.log("votePoolTotal: ", votePoolTotal);
         //votePoolTotal = votePoolTotal + state.market1.challenge.amount;
-        // for demo purpose, just give all the pool to alice
-        // sorry, demo only code here.
-        state.balances['alice'] += votePoolTotal;
+        doPayout("vote", finalOutcome, voteRecords, state);
+        
         console.log("distributed vote pool");
       }
 
       // distribute the original bet pool to the people
       console.log("5");
-      let betPoolTotal = 0;
+      // let betPoolTotal = 0;
       let bets = state.market1.bets;
-      for (let j = 0; j < bets.length; j++) {
-        console.log("6");
-        let bet = bets[j];
-        betPoolTotal += bet.amount;
-      }
+      // for (let j = 0; j < bets.length; j++) {
+      //   console.log("6");
+      //   let bet = bets[j];
+      //   betPoolTotal += bet.amount;
+      // }
       console.log("10");
-      state.balances['alice'] += betPoolTotal;
+      
+      doPayout("bet", finalOutcome, bets, state);
+
       console.log("11");
 
 
@@ -522,3 +526,5 @@ condition to end phase: when everything in the phase is executed
 ** other info **
 time is not actual time.  it is block height
 */
+
+});
