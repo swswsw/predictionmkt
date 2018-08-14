@@ -70,7 +70,7 @@ test invocation:
 
 > curl -X POST http://localhost:3000/txs -d '{"type": "bet", "outcome": 1, "amount": 10, "user": "alice"}'
 
-> curl -X POST http://localhost:3000/txs -d '{"type": "bet", "outcome": 1, "amount": 10, "user": "bob"}'
+> curl -X POST http://localhost:3000/txs -d '{"type": "bet", "outcome": 2, "amount": 10, "user": "bob"}'
 
 > curl -X POST http://localhost:3000/txs -d '{"type": "oracle", "outcome": 2}'
 
