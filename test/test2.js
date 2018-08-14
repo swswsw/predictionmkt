@@ -10,5 +10,8 @@ test('test ', function(t) {
 
   doPayout("bet", 1, bets, state);
 
+  t.equals(state.balances.alice, 10010);
+  t.equals(state.balances.bob, 9990);
+
   t.end();
 });

@@ -300,8 +300,8 @@ class Blockchain {
    * @param {*} amount 
    * @return false if not successful.  return a transfer info object if successful.
    */
-  static transfer(user, amount) {
-    // tbd
+  static transfer(user, amount, state) {
+    state.balances[user] += amount.toNumber();
     return {"success": true};
   }
 }
@@ -385,7 +385,7 @@ function doPayout(voteOrBet, finalOutcome, bets, state) {
       // todo: we might want to floor it to prevent multiple rounding to exceed the total payout
       payoutAmount = amount.times(betPoolTotal).dividedBy(winnerPoolTotal);
       Event.Trigger(keywords.eventKey, "payoutAmount: " + payoutAmount);
-      console.log("payoutAmount: ", payoutAmount);
+      console.log("payoutAmount: ", payoutAmount.toNumber());
 
 
 
@@ -405,7 +405,7 @@ function doPayout(voteOrBet, finalOutcome, bets, state) {
         payouts.push(payoutElem);
 
 
-        var result = Blockchain.transfer(user, payoutAmount);
+        var result = Blockchain.transfer(user, payoutAmount, state);
         if (!result) {
           Event.Trigger(keywords.eventKey, "transfer failed: " + payoutAmount + " to " + user);
           console.log("transfer failed");
