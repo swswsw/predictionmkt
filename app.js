@@ -229,18 +229,44 @@ function txDistributeHandler(state, tx, chainInfo) {
         let voteRecords = state.market1.voteRecords;
         console.log("1");
         let votePoolTotal = 0;
+        let result = {};
+
         for (let i = 0; i < voteRecords.length; i++) {
           let vote = voteRecords[i];
-          //let result = {};
-          //result[vote.outcome] =
+          if (typeof result[vote.outcome] === "undefined") {
+            result[vote.outcome] = vote.amount;
+          } else {
+            result[vote.outcome] += vote.amount;
+          }
           console.log("vote amount", vote.amount);
           votePoolTotal += vote.amount;
         }
+        
         console.log("votePoolTotal: ", votePoolTotal);
         //votePoolTotal = votePoolTotal + state.market1.challenge.amount;
+        console.log("vote result", result);
+        LocalContractStorage.setValue("voteResult", result);
+
+        // determine which outcome win.
+        // loop through to find the highest voted amount
+        let highestOutcome;
+        let highestOutcomeAmount = -1; 
+        for (let outcome in result) {
+          if (result[outcome] > highestOutcomeAmount) {
+            highestOutcome = outcome;
+            highestOutcomeAmount = result[outcome];
+          }
+        }
+
+        // set the final outcome to the highest voted outcome
+        finalOutcome = highestOutcome;
+        console.log("final voted outcome: ", finalOutcome);
+        LocalContractStorage.setValue("votedOutcome", finalOutcome);
+
+        console.log("distributed vote pool");
         doPayout("vote", finalOutcome, voteRecords, state);
         
-        console.log("distributed vote pool");
+        
       }
 
       // distribute the original bet pool to the people
