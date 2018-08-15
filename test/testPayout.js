@@ -118,6 +118,7 @@ test('test doPayout for votes', function(t) {
   doPayout("vote", 1, votes, state);
 
   // alice balance should be ~9896.66666666666666666666
+  // tbd: worry about rounding
   t.true(state.balances.alice >= 9896.6666 && state.balances.alice <= 9896.6667, "check alice balances is correct");
   t.equals(state.balances.bob, 9980);
   t.equals(state.balances.carol, 10003.33333333333333333333);
