@@ -1,4 +1,4 @@
-(function (exports, require, module, __filename, __dirname) { let lotion = require('lotion')
+let lotion = require('lotion')
 let BigNumber = require('bignumber.js'); // https://github.com/MikeMcl/bignumber.js/
 
 // initial state
@@ -526,5 +526,3 @@ condition to end phase: when everything in the phase is executed
 ** other info **
 time is not actual time.  it is block height
 */
-
-});
