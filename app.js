@@ -31,7 +31,11 @@ let initialState = {
   },
 }
 
-//
+/*
+calculation:
+in general, we try to use bignumber to do calculation.
+however, we will still store the final result in state object as number.  because bignumber object does not store in state well.
+*/
 
 /*
 format of start tx
@@ -117,9 +121,9 @@ function txBetHandler(state, tx, chainInfo) {
       let cloned = Object.assign({}, tx);
       console.log("bet: ", cloned);
       let user = cloned.user;
-      let amount = cloned.amount;
+      let amount = new BigNumber(cloned.amount);
       // lock up their staking tokens
-      state.balances[user] = state.balances[user] - amount;
+      state.balances[user] = new BigNumber(state.balances[user]).minus(amount).toNumber();
       state.market1.bets.push(cloned);
       console.log("bets: ", state.market1.bets);
     } else {
@@ -151,9 +155,9 @@ function txChallengeHandler(state, tx, chainInfo) {
       let cloned = Object.assign({}, tx);
       console.log("challenge tx: ", cloned);
       let user = cloned.user;
-      let amount = cloned.amount;
+      let amount = new BigNumber(cloned.amount);
       // lock up their staking tokens
-      state.balances[user] = state.balances[user] - amount;
+      state.balances[user] = new BigNumber(state.balances[user]).minus(amount).toNumber();
       state.market1.challenge = cloned;
       console.log("challenge: ", state.market1.challenge);
     } else {
@@ -181,10 +185,10 @@ function txVoteHandler(state, tx, chainInfo) {
         let cloned = Object.assign({}, tx);
         console.log("vote tx", cloned);
         let user = cloned.user;
-        let amount = cloned.amount;
+        let amount = new BigNumber(cloned.amount);
         let outcome = cloned.outcome;
         // lock up their staking tokens
-        state.balances[user] = state.balances[user] - amount;
+        state.balances[user] = new BigNumber(state.balances[user]).minus(amount).toNumber();
         state.market1.voteRecords.push(cloned);
         // update votes
         //updateVotes(outcome, amount);
@@ -206,7 +210,7 @@ function updateVotes(outcome, amount, state) {
   //   state.market1.votes[outcomeName] = 0;
   //   console.log("4");
   // }
-  state.market1.votes[outcomeName] = state.market1.votes[outcomeName] + amount;
+  state.market1.votes[outcomeName] = new BigNumber(state.market1.votes[outcomeName]).plus(amount).toNumber();
 }
 
 function txDistributeHandler(state, tx, chainInfo) {
@@ -228,18 +232,19 @@ function txDistributeHandler(state, tx, chainInfo) {
         // give it to the winners proportionally.
         let voteRecords = state.market1.voteRecords;
         console.log("1");
-        let votePoolTotal = 0;
+        let votePoolTotal = new BigNumber(0);
         let result = {};
 
         for (let i = 0; i < voteRecords.length; i++) {
           let vote = voteRecords[i];
+          let voteAmount = new BigNumber(vote.amount);
           if (typeof result[vote.outcome] === "undefined") {
-            result[vote.outcome] = vote.amount;
+            result[vote.outcome] = voteAmount.toNumber();
           } else {
-            result[vote.outcome] += vote.amount;
+            result[vote.outcome] = new BigNumber(result[vote.outcome]).plus(voteAmount).toNumber();
           }
-          console.log("vote amount", vote.amount);
-          votePoolTotal += vote.amount;
+          console.log("vote amount", voteAmount.toNumber());
+          votePoolTotal = votePoolTotal.plus(voteAmount);
         }
         
         console.log("votePoolTotal: ", votePoolTotal);
@@ -249,14 +254,16 @@ function txDistributeHandler(state, tx, chainInfo) {
 
         // determine which outcome win.
         // loop through to find the highest voted amount
-        let highestOutcome;
-        let highestOutcomeAmount = -1; 
+        let highestOutcome; // the outcome with highest votes.  
+        let highestOutcomeAmount = new BigNumber(-1); // the staked token amount of highest-voted outcome
         for (let outcome in result) {
-          if (result[outcome] > highestOutcomeAmount) {
+          let outcomeAmount = new BigNumber(result[outcome]); // the amount of votes (amount of tokens) for the this outcome
+          if (outcomeAmount.gt(highestOutcomeAmount)) {
             highestOutcome = outcome;
-            highestOutcomeAmount = result[outcome];
+            highestOutcomeAmount = outcomeAmount;
           }
         }
+        console.log("voted outcome: " + highestOutcome + ".  tokens staked for voted outcome: " + highestOutcomeAmount.toNumber());
 
         // set the final outcome to the highest voted outcome
         finalOutcome = highestOutcome;
@@ -331,7 +338,8 @@ class Blockchain {
    * @return false if not successful.  return a transfer info object if successful.
    */
   static transfer(user, amount, state) {
-    state.balances[user] += amount.toNumber();
+    let bnAmount = new BigNumber(amount);
+    state.balances[user] = new BigNumber(state.balances[user]).plus(bnAmount).toNumber();
     return {"success": true};
   }
 }
@@ -365,9 +373,9 @@ function doPayout(voteOrBet, finalOutcome, bets, state) {
   //let finalOutcome = LocalContractStorage.get("finalOutcome");
   let bet;
   let user;
-  let amount;
-  let userOutcome;
-  let payoutAmount;
+  let amount; // BigNumber
+  let userOutcome; // not BigNumber
+  let payoutAmount; // BigNumber
   let betsIdx = 0;
   let betPoolTotal = new BigNumber(0);
   let winnerPoolTotal = new BigNumber(0);
@@ -387,7 +395,7 @@ function doPayout(voteOrBet, finalOutcome, bets, state) {
       bet = bets[betsIdx];
       Event.Trigger(keywords.eventKey, "bets[" + betsIdx + "]: " + JSON.stringify(bet));
       user = bet.user;
-      amount = bet.amount;
+      amount = new BigNumber(bet.amount);
       userOutcome = bet.outcome;
       betPoolTotal = betPoolTotal.plus(amount);
       if (finalOutcome == userOutcome) {
