@@ -1,10 +1,10 @@
 let lotion = require('lotion')
 let BigNumber = require('bignumber.js'); // https://github.com/MikeMcl/bignumber.js/
 
-// initial state
-// for demo purpose, we initialize the system with an opened prediction market.
-let initMarket1 = {
-  id: 1, // market id
+// market state template.
+// every market will have a state like this.
+let marketTemplate = {
+  id: "", // [string] market id
   phaseTime: {}, // the start and end time of each phase (time in blockheight)
   bets: [],
   oracles: [], // list of approved oracles when market is created
@@ -12,7 +12,7 @@ let initMarket1 = {
                     // just one single result.  outcome is specified by 1, 2, ....
                     // 0 indicate no outcome yet
   //oracleOutcomes: [], // when oracle pushes the result, it is stored here.
-  challenge: {},
+  challenge: undefined, // [Object] challenge object stating the challenge info
   voteRecords: [], // list of all vote
   // votes: {
   //   outcome1: 0,
@@ -22,8 +22,14 @@ let initMarket1 = {
   payoutRatio: 1.5,
 }
 
+
+let initMarket = Object.assign({}, marketTemplate);
+
 let initialState = {
-  market1: initMarket1,
+  market: {
+    market1: initMarket,
+  }, // store the various market.  each market will have a market state object inside this.  
+  
   balances: {
     'alice': 10000,
     'bob': 10000,
@@ -106,12 +112,23 @@ function txStartHandler(state, tx, chainInfo) {
     // calculate the phase time
     let cloned = Object.assign({}, tx);
     console.log("start: ", cloned);
+    let marketId = cloned.marketId;
+
+    // create a new market
+    createNewMarket(state, marketId);
+
     let blockHeight = chainInfo.height;
     var t1 = 1;
     let phaseTime = calcPhaseTime(blockHeight);
-    state.market1.phaseTime = phaseTime;
-    console.log("phaseTime: ", state.market1.phaseTime);
+    marketSelector(state, marketId).phaseTime = phaseTime;
+    console.log("phaseTime: ", marketSelector(state, marketId).phaseTime);
   }
+}
+
+function createNewMarket(state, marketId) {
+  let initMarket = Object.assign({}, marketTemplate);
+  initMarket.id = marketId;
+  state.market[marketId] = initMarket;
 }
 
 function txBetHandler(state, tx, chainInfo) {
@@ -120,12 +137,13 @@ function txBetHandler(state, tx, chainInfo) {
     if (isInPhase(chainInfo.height, "market", state)) {
       let cloned = Object.assign({}, tx);
       console.log("bet: ", cloned);
+      let marketId = cloned.marketId;
       let user = cloned.user;
       let amount = new BigNumber(cloned.amount);
       // lock up their staking tokens
       state.balances[user] = new BigNumber(state.balances[user]).minus(amount).toNumber();
-      state.market1.bets.push(cloned);
-      console.log("bets: ", state.market1.bets);
+      marketSelector(state, marketId).bets.push(cloned);
+      console.log("bets: ", marketSelector(state, marketId).bets);
     } else {
       console.log("wrong phase. bet can only be done in market phase.");
     }
@@ -139,8 +157,9 @@ function txOracleHandler(state, tx, chainInfo) {
       console.log("should check oracle identity, but that checking is skipped for hackathon.");
       let cloned = Object.assign({}, tx);
       console.log("oracle tx: ", cloned);
-      state.market1.oracleOutcome = cloned.outcome;
-      console.log("oracleOutcome: ", state.market1.oracleOutcome);
+      let marketId = cloned.marketId;
+      marketSelector(state, marketId).oracleOutcome = cloned.outcome;
+      console.log("oracleOutcome: ", marketSelector(state, marketId).oracleOutcome);
     } else {
       console.log("wrong phase. oracle call can only be done in oracle phase.");
     }
@@ -154,12 +173,13 @@ function txChallengeHandler(state, tx, chainInfo) {
       console.log("skip challenger verification and balance verification for hackathon.");
       let cloned = Object.assign({}, tx);
       console.log("challenge tx: ", cloned);
+      let marketId = cloned.marketId;
       let user = cloned.user;
       let amount = new BigNumber(cloned.amount);
       // lock up their staking tokens
       state.balances[user] = new BigNumber(state.balances[user]).minus(amount).toNumber();
-      state.market1.challenge = cloned;
-      console.log("challenge: ", state.market1.challenge);
+      marketSelector(state, marketId).challenge = cloned;
+      console.log("challenge: ", marketSelector(state, marketId).challenge);
     } else {
       console.log("wrong phase. challenge call can only be done in challenge phase.");
     }
@@ -170,10 +190,10 @@ function txChallengeHandler(state, tx, chainInfo) {
  * check if challenge has been issued
  * (if the state contains challenge info)
  */
-function challenged(state) {
-  let obj = state.market1.challenge;
+function challenged(state, marketId) {
+  let obj = marketSelector(state, marketId).challenge;
   // check if challenge object is still empty
-  return !(Object.keys(obj).length === 0 && obj.constructor === Object)
+  return (typeof obj !== 'undefined');
 }
 
 function txVoteHandler(state, tx, chainInfo) {
@@ -181,18 +201,21 @@ function txVoteHandler(state, tx, chainInfo) {
     // ignore request if it is outside of a particular phase timeframe
     if (isInPhase(chainInfo.height, "vote", state)) {
       console.log("skip voter verification and balance verification for hackathon");
-      if (challenged(state)) {
-        let cloned = Object.assign({}, tx);
-        console.log("vote tx", cloned);
-        let user = cloned.user;
-        let amount = new BigNumber(cloned.amount);
-        let outcome = cloned.outcome;
+
+      let cloned = Object.assign({}, tx);
+      console.log("vote tx", cloned);
+      let marketId = cloned.marketId;
+      let user = cloned.user;
+      let amount = new BigNumber(cloned.amount);
+      let outcome = cloned.outcome;
+
+      if (challenged(state, marketId)) {
         // lock up their staking tokens
         state.balances[user] = new BigNumber(state.balances[user]).minus(amount).toNumber();
-        state.market1.voteRecords.push(cloned);
+        marketSelector(state, marketId).voteRecords.push(cloned);
         // update votes
         //updateVotes(outcome, amount);
-        console.log("vote records: ", state.market1.voteRecords);
+        console.log("vote records: ", marketSelector(state, marketId).voteRecords);
       } else {
         console.log("do not accept vote if there is no challenge");
       }
@@ -205,32 +228,36 @@ function txVoteHandler(state, tx, chainInfo) {
 
 function updateVotes(outcome, amount, state) {
   let outcomeName = 'outcome' + outcome;
-  // if (! (outcome in state.market1.votes) ) {
+  // if (! (outcome in marketSelector(state, marketId).votes) ) {
   //   console.log("3");
-  //   state.market1.votes[outcomeName] = 0;
+  //   marketSelector(state, marketId).votes[outcomeName] = 0;
   //   console.log("4");
   // }
-  state.market1.votes[outcomeName] = new BigNumber(state.market1.votes[outcomeName]).plus(amount).toNumber();
+  marketSelector(state, marketId).votes[outcomeName] = new BigNumber(marketSelector(state, marketId).votes[outcomeName]).plus(amount).toNumber();
 }
 
 function txDistributeHandler(state, tx, chainInfo) {
   if (tx.type === "distribute") {
     // ignore request if it is outside of a particular phase timeframe
     if (isInPhase(chainInfo.height, "distribute", state)) {
+      let cloned = Object.assign({}, tx);
+      console.log("distribute tx", cloned);
+      let marketId = cloned.marketId;
+
       // do final calculation and distribute the tokens accordingly.
       
       // finaloutcome is assumed to be oracleoutcome, unless there is a vote.
-      let finalOutcome = state.market1.oracleOutcome;
+      let finalOutcome = marketSelector(state, marketId).oracleOutcome;
 
       // if challenge is there
-      if (Object.keys(state.market1.challenge).length > 0) {
+      if (challenged(state, marketId)) {
         // get voting pool result
         // distribute to the winner of the voter who vote for it.
         console.log("challenge was requested");
 
         // sum up voting pool.
         // give it to the winners proportionally.
-        let voteRecords = state.market1.voteRecords;
+        let voteRecords = marketSelector(state, marketId).voteRecords;
         console.log("1");
         let votePoolTotal = new BigNumber(0);
         let result = {};
@@ -248,7 +275,7 @@ function txDistributeHandler(state, tx, chainInfo) {
         }
         
         console.log("votePoolTotal: ", votePoolTotal);
-        //votePoolTotal = votePoolTotal + state.market1.challenge.amount;
+        //votePoolTotal = votePoolTotal + marketSelector(state, marketId).challenge.amount;
         console.log("vote result", result);
         LocalContractStorage.setValue("voteResult", result);
 
@@ -271,7 +298,7 @@ function txDistributeHandler(state, tx, chainInfo) {
         LocalContractStorage.setValue("votedOutcome", finalOutcome);
 
         console.log("distributed vote pool");
-        doPayout("vote", finalOutcome, voteRecords, state);
+        doPayout("vote", finalOutcome, voteRecords, state, marketId);
         
         
       }
@@ -279,7 +306,7 @@ function txDistributeHandler(state, tx, chainInfo) {
       // distribute the original bet pool to the people
       console.log("5");
       // let betPoolTotal = 0;
-      let bets = state.market1.bets;
+      let bets = marketSelector(state, marketId).bets;
       // for (let j = 0; j < bets.length; j++) {
       //   console.log("6");
       //   let bet = bets[j];
@@ -287,7 +314,7 @@ function txDistributeHandler(state, tx, chainInfo) {
       // }
       console.log("10");
       
-      doPayout("bet", finalOutcome, bets, state);
+      doPayout("bet", finalOutcome, bets, state, marketId);
 
       console.log("11");
 
@@ -348,7 +375,7 @@ class Blockchain {
  * both vote and bet payout distribution logic are mostly the same.  we generalized them together.  
  * @param {string} voteOrBet 
  */
-function doPayout(voteOrBet, finalOutcome, bets, state) {
+function doPayout(voteOrBet, finalOutcome, bets, state, marketId) {
   LocalContractStorage.state = state;
 
   let keywords = {}; // keywords to multiplex between vote and bet
@@ -460,6 +487,15 @@ function doPayout(voteOrBet, finalOutcome, bets, state) {
 }
 
 /**
+ * return the market part of the state referred by the marketId
+ * @param {Object} state 
+ * @param {string} marketId 
+ */
+function marketSelector(state, marketId) {
+  return state.market[marketId];
+}
+
+/**
  * return the start and end time for all phase.
  */
 function calcPhaseTime(startingBlockHeight) {
@@ -499,19 +535,19 @@ function isInPhase(blockHeight, phase, state) {
   let result = false;
   switch (phase) {
     case "market":
-      result = blockHeight >= state.market1.phaseTime.marketStart && blockHeight <= state.market1.phaseTime.marketEnd;
+      result = blockHeight >= marketSelector(state, marketId).phaseTime.marketStart && blockHeight <= marketSelector(state, marketId).phaseTime.marketEnd;
       break;
     case "oracle":
-      result = blockHeight >= state.market1.phaseTime.oracleStart && blockHeight <= state.market1.phaseTime.oracleEnd;
+      result = blockHeight >= marketSelector(state, marketId).phaseTime.oracleStart && blockHeight <= marketSelector(state, marketId).phaseTime.oracleEnd;
       break;
     case "challenge":
-      result = blockHeight >= state.market1.phaseTime.challengeStart && blockHeight <= state.market1.phaseTime.challengeEnd;
+      result = blockHeight >= marketSelector(state, marketId).phaseTime.challengeStart && blockHeight <= marketSelector(state, marketId).phaseTime.challengeEnd;
       break;
     case "vote":
-      result = blockHeight >= state.market1.phaseTime.voteStart && blockHeight <= state.market1.phaseTime.voteEnd;
+      result = blockHeight >= marketSelector(state, marketId).phaseTime.voteStart && blockHeight <= marketSelector(state, marketId).phaseTime.voteEnd;
       break;
     case "distribute":
-      result = blockHeight >= state.market1.phaseTime.distributeStart && blockHeight <= state.market1.phaseTime.distributeEnd;
+      result = blockHeight >= marketSelector(state, marketId).phaseTime.distributeStart && blockHeight <= marketSelector(state, marketId).phaseTime.distributeEnd;
       break;
     default:
       result = false;
