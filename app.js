@@ -114,14 +114,19 @@ function txStartHandler(state, tx, chainInfo) {
     console.log("start: ", cloned);
     let marketId = cloned.marketId;
 
-    // create a new market
-    createNewMarket(state, marketId);
+    // check marketId does not exist yet
+    if (typeof (state.market[marketId]) === 'undefined') {
+      // create a new market
+      createNewMarket(state, marketId);
 
-    let blockHeight = chainInfo.height;
-    var t1 = 1;
-    let phaseTime = calcPhaseTime(blockHeight);
-    marketSelector(state, marketId).phaseTime = phaseTime;
-    console.log("phaseTime: ", marketSelector(state, marketId).phaseTime);
+      let blockHeight = chainInfo.height;
+      var t1 = 1;
+      let phaseTime = calcPhaseTime(blockHeight);
+      marketSelector(state, marketId).phaseTime = phaseTime;
+      console.log("phaseTime: ", marketSelector(state, marketId).phaseTime);
+    } else {
+      console.log("marketId " + marketId + " already exists.  new market is not created.");
+    }
   }
 }
 
