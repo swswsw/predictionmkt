@@ -1,5 +1,8 @@
 let lotion = require('lotion')
 let BigNumber = require('bignumber.js'); // https://github.com/MikeMcl/bignumber.js/
+let secp = require('secp256k1');
+let { sha256, addressHash } = require('./common.js');
+let getSigHash = require('./sigHash.js');
 
 // market state template.
 // every market will have a state like this.
@@ -82,6 +85,7 @@ let app = lotion({
   devMode: true
 })
 
+app.use(txVerifySigHandler);
 app.use(txHandler1);
 app.use(txHandler2);
 app.use(txStartHandler);
@@ -96,6 +100,33 @@ app.listen(3000).then(function(appInfo) {
   console.log(appInfo);
 })
 
+/**
+ * doesn't do anything other than verify signature.  
+ * @param {*} state 
+ * @param {*} tx 
+ * @param {*} chainInfo 
+ */
+function txVerifySigHandler(state, tx, chainInfo) {
+  if (tx.type === "verifySig") {
+    let cloned = Object.assign({}, tx);
+    console.log("verifySig tx: ", cloned);
+    let from = cloned.from;
+    let pubkey = from.pubkey;
+    let signature = from.signature;
+    let sigHash = getSigHash(tx);
+    //let addr = createAddr();
+    console.log("pubkey: ", pubkey);
+    console.log("signature: ", signature);
+    console.log("sigHash: ", sigHash);
+
+    // verify signature
+    if (!secp.verify(sigHash, signature, pubkey)) {
+      throw Error('Invalid signature')
+    } else {
+      console.log("signature verified! ***");
+    }    
+  }
+}
 
 function txHandler1(state, tx, chainInfo) {
   console.log("tx: ", tx);

@@ -84,5 +84,4 @@ test invocation:
 
 > curl -X POST http://localhost:3000/txs -d '{"type": "distribute", "marketId": "market2"}'
 
-
 ## update
