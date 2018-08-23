@@ -96,6 +96,23 @@ app.listen(3000).then(function(appInfo) {
   console.log(appInfo);
 })
 
+/**
+ * doesn't do anything other than verify signature.  
+ * @param {*} state 
+ * @param {*} tx 
+ * @param {*} chainInfo 
+ */
+function txVerifySigHandler(state, tx, chainInfo) {
+  if (tx.type === "verifySig") {
+    let cloned = Object.assign({}, tx);
+    console.log("bet: ", cloned);
+    let from = cloned.from;
+    let pubkey = from.pubkey;
+    let signature = from.signature;
+    let sigHash = getSigHash(tx);
+    
+  }
+}
 
 function txHandler1(state, tx, chainInfo) {
   console.log("tx: ", tx);
