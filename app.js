@@ -114,10 +114,11 @@ function txVerifySigHandler(state, tx, chainInfo) {
     let pubkey = from.pubkey;
     let signature = from.signature;
     let sigHash = getSigHash(tx);
-    //let addr = createAddr();
+    let addr = addressHash(pubkey);
     console.log("pubkey: ", pubkey);
     console.log("signature: ", signature);
     console.log("sigHash: ", sigHash);
+    console.log("addr: ", addr);
 
     // verify signature
     if (!secp.verify(sigHash, signature, pubkey)) {
