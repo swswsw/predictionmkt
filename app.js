@@ -121,7 +121,7 @@ function txVerifySigHandler(state, tx, chainInfo) {
 
     // verify signature
     if (!secp.verify(sigHash, signature, pubkey)) {
-      throw Error('Invalid signature')
+      console.log('invalid signature');
     } else {
       console.log("signature verified! ***");
     }    

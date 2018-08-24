@@ -20,7 +20,6 @@ async function main () {
     },
     test: "test",
     to: {
-      amount: 5,
     }
   }
 
