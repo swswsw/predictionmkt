@@ -109,7 +109,7 @@ app.listen(3000).then(function(appInfo) {
 function txVerifySigHandler(state, tx, chainInfo) {
   if (tx.type === "verifySig") {
     let cloned = Object.assign({}, tx);
-    console.log("verifySig tx: ", cloned);
+    console.log("verifySig tx: ", JSON.stringify(cloned));
     let from = cloned.from;
     let pubkey = from.pubkey;
     let signature = from.signature;
@@ -130,7 +130,7 @@ function txVerifySigHandler(state, tx, chainInfo) {
 }
 
 function txHandler1(state, tx, chainInfo) {
-  console.log("tx: ", tx);
+  console.log("tx: ", JSON.stringify(tx));
   //console.log(chainInfo);
 }
 
@@ -143,7 +143,7 @@ function txStartHandler(state, tx, chainInfo) {
     // starting the market.
     // calculate the phase time
     let cloned = Object.assign({}, tx);
-    console.log("start: ", cloned);
+    console.log("start: ", JSON.stringify(cloned));
     let marketId = cloned.marketId;
 
     // check marketId does not exist yet
@@ -173,7 +173,7 @@ function txBetHandler(state, tx, chainInfo) {
     // ignore request if it is outside of a particular phase timeframe
     if (isInPhase(chainInfo.height, "market", state)) {
       let cloned = Object.assign({}, tx);
-      console.log("bet: ", cloned);
+      console.log("bet: ", JSON.stringify(cloned));
       let marketId = cloned.marketId;
       let user = cloned.user;
       let amount = new BigNumber(cloned.amount);
@@ -193,7 +193,7 @@ function txOracleHandler(state, tx, chainInfo) {
     if (isInPhase(chainInfo.height, "oracle", state)) {
       console.log("should check oracle identity, but that checking is skipped for hackathon.");
       let cloned = Object.assign({}, tx);
-      console.log("oracle tx: ", cloned);
+      console.log("oracle tx: ", JSON.stringify(cloned));
       let marketId = cloned.marketId;
       marketSelector(state, marketId).oracleOutcome = cloned.outcome;
       console.log("oracleOutcome: ", marketSelector(state, marketId).oracleOutcome);
@@ -209,7 +209,7 @@ function txChallengeHandler(state, tx, chainInfo) {
     if (isInPhase(chainInfo.height, "challenge", state)) {
       console.log("skip challenger verification and balance verification for hackathon.");
       let cloned = Object.assign({}, tx);
-      console.log("challenge tx: ", cloned);
+      console.log("challenge tx: ", JSON.stringify(cloned));
       let marketId = cloned.marketId;
       let user = cloned.user;
       let amount = new BigNumber(cloned.amount);
@@ -240,7 +240,7 @@ function txVoteHandler(state, tx, chainInfo) {
       console.log("skip voter verification and balance verification for hackathon");
 
       let cloned = Object.assign({}, tx);
-      console.log("vote tx", cloned);
+      console.log("vote tx", JSON.stringify(cloned));
       let marketId = cloned.marketId;
       let user = cloned.user;
       let amount = new BigNumber(cloned.amount);
@@ -278,7 +278,7 @@ function txDistributeHandler(state, tx, chainInfo) {
     // ignore request if it is outside of a particular phase timeframe
     if (isInPhase(chainInfo.height, "distribute", state)) {
       let cloned = Object.assign({}, tx);
-      console.log("distribute tx", cloned);
+      console.log("distribute tx", JSON.stringify(cloned));
       let marketId = cloned.marketId;
 
       // do final calculation and distribute the tokens accordingly.

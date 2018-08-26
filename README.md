@@ -84,4 +84,7 @@ test invocation:
 
 > curl -X POST http://localhost:3000/txs -d '{"type": "distribute", "marketId": "market2"}'
 
+> curl -X POST http://localhost:3000/txs -d '{"type": "verifySig", "from": { "pubkey": "rewlkjrlw", "signature": "rewlkajrlewk" }, "to": {} }'
+this will return "", but that's normal.  you can see whether signature is verified from the the server log
+
 ## update
