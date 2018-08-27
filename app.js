@@ -94,7 +94,7 @@ app.use(txOracleHandler);
 app.use(txChallengeHandler);
 app.use(txVoteHandler);
 app.use(txDistributeHandler);
-
+app.use(txSendHandler);
 
 app.listen(3000).then(function(appInfo) {
   console.log(appInfo);
@@ -110,22 +110,12 @@ function txVerifySigHandler(state, tx, chainInfo) {
   if (tx.type === "verifySig") {
     let cloned = Object.assign({}, tx);
     console.log("verifySig tx: ", JSON.stringify(cloned));
-    let from = cloned.from;
-    let pubkey = from.pubkey;
-    let signature = from.signature;
-    let sigHash = getSigHash(tx);
-    let addr = addressHash(pubkey);
-    console.log("pubkey: ", pubkey);
-    console.log("signature: ", signature);
-    console.log("sigHash: ", sigHash);
-    console.log("addr: ", addr);
-
-    // verify signature
-    if (!secp.verify(sigHash, signature, pubkey)) {
-      console.log('invalid signature');
+    let result = verifySig(tx);
+    if (result.verified) {
+      console.log("signature verified!");
     } else {
-      console.log("signature verified! ***");
-    }    
+      throw Error("invalid signature");
+    }
   }
 }
 
@@ -369,9 +359,94 @@ function txDistributeHandler(state, tx, chainInfo) {
   }
 }
 
+/**
+ * send token (balances) from a to b
+ * @param {*} state 
+ * @param {*} tx 
+ * @param {*} chainInfo 
+ */
+function txSendHandler(state, tx, chainInfo) {
+  if (tx.type === "send") {
+    let cloned = Object.assign({}, tx);
+    console.log("send tx: ", JSON.stringify(cloned));
+    let from = cloned.from;
+    let pubkey = from.pubkey;
+    let signature = from.signature;
+    let amount = new BigNumber(from.amount);
+    let sigHash = getSigHash(tx);
+    let fromAddr = addressHash(pubkey);
+    let to = cloned.to;
+    let toAddr = to.address;
+    console.log("pubkey: ", pubkey);
+    console.log("signature: ", signature);
+    console.log("sigHash: ", sigHash);
+    console.log("from addr: ", fromAddr);
+    console.log("to addr: ", toAddr);
+
+    // verify signature
+    if (!secp.verify(sigHash, signature, pubkey)) {
+      console.log('invalid signature! *** ');
+      throw Error('invalid signature!');
+    } else {
+      console.log("signature verified!  ***");
+      console.log("send " + amount + " from " + fromAddr + " to " + toAddr);
+
+      send(from, to);
+    }    
+  }
+}
+
+function send(from, to) {
+  let fromBalance = new BigNumber(state.balances[from]);
+  state.balances[from] = fromBalance.minus(amount).toNumber();
+
+  let toBalance = new BigNumber(state.balances[to]);
+  state.balances[to] = toBalance.minus(amount).toNumber();
+}
+
+/**
+ * verify is signature is correct.  
+ * 
+ * @param {*} tx 
+ * @return {verified: [boolean], address: [string]}
+ * verified is true if signature is verified.  and if user is provided, addr is same as user.
+ * address is the address derived form the public key provided in tx.from.pubkey.
+ */
+function verifySig(tx) {
+  let verified = false;
+  let addrSame = true;
+  let cloned = Object.assign({}, tx);
+  console.log("send tx: ", JSON.stringify(cloned));
+  let from = cloned.from;
+  let pubkey = from.pubkey;
+  let signature = from.signature;
+  let sigHash = getSigHash(tx);
+  let fromAddr = addressHash(pubkey);
+  console.log("pubkey: ", pubkey);
+  console.log("signature: ", signature);
+  console.log("sigHash: ", sigHash);
+  console.log("from addr: ", fromAddr);
+  let user = cloned.user;
+  if (typeof cloned.user !== "undefined") {
+    addrSame = (fromAddr == user);
+  }
+
+  // verify signature
+  if (!secp.verify(sigHash, signature, pubkey)) {
+    console.log('invalid signature! *** ');
+    
+  } else {
+    console.log("signature verified!  ***");
+    verified = true;
+  }
+
+  return {"verified": (verified && addrSame), "address": fromAddr};
+}
+
 
 class LocalContractStorage {
 
+  
   constructor(state) {
     this.state = state;
   }
