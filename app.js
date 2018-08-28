@@ -370,38 +370,41 @@ function txSendHandler(state, tx, chainInfo) {
     let cloned = Object.assign({}, tx);
     console.log("send tx: ", JSON.stringify(cloned));
     let from = cloned.from;
-    let pubkey = from.pubkey;
-    let signature = from.signature;
     let amount = new BigNumber(from.amount);
-    let sigHash = getSigHash(tx);
-    let fromAddr = addressHash(pubkey);
-    let to = cloned.to;
-    let toAddr = to.address;
-    console.log("pubkey: ", pubkey);
-    console.log("signature: ", signature);
-    console.log("sigHash: ", sigHash);
-    console.log("from addr: ", fromAddr);
-    console.log("to addr: ", toAddr);
 
-    // verify signature
-    if (!secp.verify(sigHash, signature, pubkey)) {
-      console.log('invalid signature! *** ');
+    let result = verifySig(cloned);
+    if (!result.verified) {
+      console.log('invalid signature!');
       throw Error('invalid signature!');
     } else {
-      console.log("signature verified!  ***");
-      console.log("send " + amount + " from " + fromAddr + " to " + toAddr);
-
-      send(from, to);
+      console.log("signature verified!");
+      let fromAddr = result.address;
+      let toAddr = cloned.to.address;
+      
+      send(state, fromAddr, toAddr, amount);
     }    
   }
 }
 
-function send(from, to) {
+/**
+ * 
+ * @param {*} from 
+ * @param {*} to 
+ * @param {BigNumber} amount 
+ */
+function send(state, from, to, amount) {
+  console.log("send " + amount + " from " + from + " to " + to);
   let fromBalance = new BigNumber(state.balances[from]);
-  state.balances[from] = fromBalance.minus(amount).toNumber();
+  let newFromBalance = fromBalance.minus(amount);
+  if (newFromBalance < 0) { 
+    let msg = "not enough balance to send " + amount + " from " + from;
+    console.log(msg);
+    throw Error(msg); 
+  }
+  state.balances[from] = newFromBalance.toNumber();
 
   let toBalance = new BigNumber(state.balances[to]);
-  state.balances[to] = toBalance.minus(amount).toNumber();
+  state.balances[to] = toBalance.plus(amount).toNumber();
 }
 
 /**
