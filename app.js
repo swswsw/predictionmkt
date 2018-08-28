@@ -110,12 +110,13 @@ function txVerifySigHandler(state, tx, chainInfo) {
   if (tx.type === "verifySig") {
     let cloned = Object.assign({}, tx);
     console.log("verifySig tx: ", JSON.stringify(cloned));
-    let result = verifySig(tx);
-    if (result.verified) {
-      console.log("signature verified!");
-    } else {
+    let verifyResult = verifySig(tx);
+    if (!verifyResult.verified) {
+      console.log('invalid signature!');
       throw Error("invalid signature");
     }
+
+    console.log("signature verified!");
   }
 }
 
@@ -164,6 +165,14 @@ function txBetHandler(state, tx, chainInfo) {
     if (isInPhase(chainInfo.height, "market", state)) {
       let cloned = Object.assign({}, tx);
       console.log("bet: ", JSON.stringify(cloned));
+
+      let verifyResult = verifySig(cloned);
+      if (!verifyResult.verified) {
+        console.log('invalid signature!');
+        throw Error('invalid signature!');
+      }  
+      
+      console.log("signature verified!");
       let marketId = cloned.marketId;
       let user = cloned.user;
       let amount = new BigNumber(cloned.amount);
@@ -184,6 +193,13 @@ function txOracleHandler(state, tx, chainInfo) {
       console.log("should check oracle identity, but that checking is skipped for hackathon.");
       let cloned = Object.assign({}, tx);
       console.log("oracle tx: ", JSON.stringify(cloned));
+
+      let verifyResult = verifySig(cloned);
+      if (!verifyResult.verified) {
+        console.log('invalid signature!');
+        throw Error('invalid signature!');
+      }
+
       let marketId = cloned.marketId;
       marketSelector(state, marketId).oracleOutcome = cloned.outcome;
       console.log("oracleOutcome: ", marketSelector(state, marketId).oracleOutcome);
@@ -200,6 +216,13 @@ function txChallengeHandler(state, tx, chainInfo) {
       console.log("skip challenger verification and balance verification for hackathon.");
       let cloned = Object.assign({}, tx);
       console.log("challenge tx: ", JSON.stringify(cloned));
+
+      let verifyResult = verifySig(cloned);
+      if (!verifyResult.verified) {
+        console.log('invalid signature!');
+        throw Error('invalid signature!');
+      }
+
       let marketId = cloned.marketId;
       let user = cloned.user;
       let amount = new BigNumber(cloned.amount);
@@ -231,6 +254,13 @@ function txVoteHandler(state, tx, chainInfo) {
 
       let cloned = Object.assign({}, tx);
       console.log("vote tx", JSON.stringify(cloned));
+
+      let verifyResult = verifySig(cloned);
+      if (!verifyResult.verified) {
+        console.log('invalid signature!');
+        throw Error('invalid signature!');
+      }
+
       let marketId = cloned.marketId;
       let user = cloned.user;
       let amount = new BigNumber(cloned.amount);
@@ -269,6 +299,13 @@ function txDistributeHandler(state, tx, chainInfo) {
     if (isInPhase(chainInfo.height, "distribute", state)) {
       let cloned = Object.assign({}, tx);
       console.log("distribute tx", JSON.stringify(cloned));
+
+      let verifyResult = verifySig(cloned);
+      if (!verifyResult.verified) {
+        console.log('invalid signature!');
+        throw Error('invalid signature!');
+      }
+
       let marketId = cloned.marketId;
 
       // do final calculation and distribute the tokens accordingly.
@@ -372,17 +409,17 @@ function txSendHandler(state, tx, chainInfo) {
     let from = cloned.from;
     let amount = new BigNumber(from.amount);
 
-    let result = verifySig(cloned);
-    if (!result.verified) {
+    let verifyResult = verifySig(cloned);
+    if (!verifyResult.verified) {
       console.log('invalid signature!');
       throw Error('invalid signature!');
-    } else {
-      console.log("signature verified!");
-      let fromAddr = result.address;
-      let toAddr = cloned.to.address;
-      
-      send(state, fromAddr, toAddr, amount);
-    }    
+    }
+
+    console.log("signature verified!");
+    let fromAddr = verifyResult.address;
+    let toAddr = cloned.to.address;
+    
+    send(state, fromAddr, toAddr, amount);
   }
 }
 
@@ -419,7 +456,7 @@ function verifySig(tx) {
   let verified = false;
   let addrSame = true;
   let cloned = Object.assign({}, tx);
-  console.log("send tx: ", JSON.stringify(cloned));
+  console.log("verifySig tx: ", JSON.stringify(cloned));
   let from = cloned.from;
   let pubkey = from.pubkey;
   let signature = from.signature;
