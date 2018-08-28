@@ -34,9 +34,9 @@ let initialState = {
   }, // store the various market.  each market will have a market state object inside this.  
   
   balances: {
-    'alice': 10000,
-    'bob': 10000,
-    'carol': 10000,
+    '5wvwWgKP3Qfw1akQoXWg4NtKmzx5v4dTj': 10000,
+    '9x2yu6AzwWphm3j6h9pTaJh63h5ioG8RL': 10000,
+    't6bUAUxNh8xoZzt6YZdQn27J4DSiR2oH': 10000,
   },
 }
 

@@ -68,19 +68,19 @@ test invocation:
 
 > curl -X POST http://localhost:3000/txs -d '{"type": "start", "marketId": "market2"}'
 
-> curl -X POST http://localhost:3000/txs -d '{"type": "bet", "marketId": "market2", "outcome": 1, "amount": 10, "user": "alice"}'
+> curl -X POST http://localhost:3000/txs -d '{"type": "bet", "marketId": "market2", "outcome": 1, "amount": 10, "user": "5wvwWgKP3Qfw1akQoXWg4NtKmzx5v4dTj"}'
 
-> curl -X POST http://localhost:3000/txs -d '{"type": "bet", "marketId": "market2", "outcome": 2, "amount": 10, "user": "bob"}'
+> curl -X POST http://localhost:3000/txs -d '{"type": "bet", "marketId": "market2", "outcome": 2, "amount": 10, "user": "9x2yu6AzwWphm3j6h9pTaJh63h5ioG8RL"}'
 
 > curl -X POST http://localhost:3000/txs -d '{"type": "oracle", "marketId": "market2", "outcome": 2}'
 
-> curl -X POST http://localhost:3000/txs -d '{"type": "challenge", "marketId": "market2", "user": "alice", "amount": 100}'
+> curl -X POST http://localhost:3000/txs -d '{"type": "challenge", "marketId": "market2", "user": "5wvwWgKP3Qfw1akQoXWg4NtKmzx5v4dTj", "amount": 100}'
 
-> curl -X POST http://localhost:3000/txs -d '{"type": "vote", "marketId": "market2", "user": "alice", "amount": 1000, "outcome": 1}'
+> curl -X POST http://localhost:3000/txs -d '{"type": "vote", "marketId": "market2", "user": "5wvwWgKP3Qfw1akQoXWg4NtKmzx5v4dTj", "amount": 1000, "outcome": 1}'
 
-> curl -X POST http://localhost:3000/txs -d '{"type": "vote", "marketId": "market2", "user": "bob", "amount": 10, "outcome": 2}'
+> curl -X POST http://localhost:3000/txs -d '{"type": "vote", "marketId": "market2", "user": "9x2yu6AzwWphm3j6h9pTaJh63h5ioG8RL", "amount": 10, "outcome": 2}'
 
-> curl -X POST http://localhost:3000/txs -d '{"type": "vote", "marketId": "market2", "user": "carol", "amount": 1000, "outcome": 1}'
+> curl -X POST http://localhost:3000/txs -d '{"type": "vote", "marketId": "market2", "user": "9x2yu6AzwWphm3j6h9pTaJh63h5ioG8RL", "amount": 1000, "outcome": 1}'
 
 > curl -X POST http://localhost:3000/txs -d '{"type": "distribute", "marketId": "market2"}'
 

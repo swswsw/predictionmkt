@@ -1,0 +1,24 @@
+local node network key pairs
+*** for testing only, not for production ***
+
+
+alice:
+priv key:  <Buffer eb ca 1f cf ba 3e 09 e8 65 61 3a 87 a3 81 48 13 ab 93 29 36 88 5c 1b 04 95 f1 c0 5c 7e 21 b1 fc>
+priv key hex:  ebca1fcfba3e09e865613a87a3814813ab932936885c1b0495f1c05c7e21b1fc
+pub key:  <Buffer 02 a3 41 7c 92 44 01 3c e6 b6 e8 56 4e 8c 9c af 15 1d 5a 2b d5 cc d0 5a 83 fa 33 d5 54 45 15 9e fa>
+pub key hex:  02a3417c9244013ce6b6e8564e8c9caf151d5a2bd5ccd05a83fa33d55445159efa
+addr:  5wvwWgKP3Qfw1akQoXWg4NtKmzx5v4dTj
+
+bob:
+priv key:  <Buffer 46 38 52 36 3a 38 c0 10 5f c1 16 99 95 69 6f b4 84 ec 11 71 0b a1 74 b3 99 4c 50 ba a5 15 94 23>
+priv key hex:  463852363a38c0105fc1169995696fb484ec11710ba174b3994c50baa5159423
+pub key:  <Buffer 02 f6 18 21 df d6 74 44 db a7 f2 06 8e 09 88 f9 a7 f7 d1 1e 8b 35 eb 0f bd 6a 4f b3 43 3a 46 84 e9>
+pub key hex:  02f61821dfd67444dba7f2068e0988f9a7f7d11e8b35eb0fbd6a4fb3433a4684e9
+addr:  9x2yu6AzwWphm3j6h9pTaJh63h5ioG8RL
+
+carol:
+priv key:  <Buffer b5 ca 89 fc ba e0 98 59 e2 af 4b c7 fc 66 e9 b1 ea cf 8e 89 3d d4 0e 47 e2 a9 9c b0 ae b9 20 4b>
+priv key hex:  b5ca89fcbae09859e2af4bc7fc66e9b1eacf8e893dd40e47e2a99cb0aeb9204b
+pub key:  <Buffer 03 f7 53 68 c8 f1 7f 36 f4 b7 37 13 9a 25 6d e3 5d 01 54 f1 6c 31 ac 6b 6c f2 69 9a 83 08 3a 2a e4>
+pub key hex:  03f75368c8f17f36f4b737139a256de35d0154f16c31ac6b6cf2699a83083a2ae4
+addr:  t6bUAUxNh8xoZzt6YZdQn27J4DSiR2oH
