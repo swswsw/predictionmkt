@@ -24,7 +24,7 @@ let privCarol = Buffer.from("b5ca89fcbae09859e2af4bc7fc66e9b1eacf8e893dd40e47e2a
 let pubCarol = secp.publicKeyCreate(privCarol); // create public key
 let addrCarol = addressHash(pubCarol);
 
-let marketId = "market6";//"m" + new Date().getTime();
+let marketId = "m" + new Date().getTime();
 
 function start() {
   let tx = {
