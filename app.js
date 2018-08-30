@@ -50,6 +50,25 @@ however, we will still store the final result in state object as number.  becaus
 format of start tx
 {
   type: "start",
+  "startInfo": {
+    "question": "Who will win FIFA 2018?",
+    "outcomes": [
+      "england",
+      "italy",
+      "brazil",
+      "germany"
+    ],
+    "oracle": ["9x2yu6AzwWphm3j6h9pTaJh63h5ioG8RL","5wvwWgKP3Qfw1akQoXWg4NtKmzx5v4dTj"], // addresses of approved oracles
+    // meta data about oracle.  eg. description
+    "oracleMeta": "http://data.com/oracleinfo",
+    "phaseTime":{
+      "marketStart":9,"marketEnd":3609,
+      "oracleStart":3610,"oracleEnd":7210,
+      "challengeStart":7211,"challengeEnd":10811,
+      "voteStart":10812,"voteEnd":14412,
+      "distributeStart":14413,"distributeEnd":18013
+    },
+  },
 }
 
 format of bets
@@ -132,10 +151,11 @@ function txHandler2(state, tx, chainInfo) {
 function txStartHandler(state, tx, chainInfo) {
   if (tx.type === "start") {
     // starting the market.
-    // calculate the phase time
+    // calculate the phase time320c2bfd1b17fdbc9dd876dd2535f562112f2cdf
     let cloned = Object.assign({}, tx);
     console.log("start: ", JSON.stringify(cloned));
     let marketId = cloned.marketId;
+    let startInfo = cloned.startInfo;
 
     // check marketId does not exist yet
     if (typeof (state.market[marketId]) === 'undefined') {
@@ -143,10 +163,17 @@ function txStartHandler(state, tx, chainInfo) {
       createNewMarket(state, marketId);
 
       let blockHeight = chainInfo.height;
-      var t1 = 1;
+      var t1 = 1; // ???  todo: delete
       let phaseTime = calcPhaseTime(blockHeight);
       marketSelector(state, marketId).phaseTime = phaseTime;
       console.log("phaseTime: ", marketSelector(state, marketId).phaseTime);
+
+      // record statInfo
+      marketSelector(state, marketId).startInfo = startInfo;
+      // if phaseTime is provided in the startInfo, override with the one in startInfo.
+      if (typeof startInfo.phaseTime !== "undefined") {
+        marketSelector(state, marketId).phaseTime = startInfo.phaseTime;
+      }
     } else {
       console.log("marketId " + marketId + " already exists.  new market is not created.");
     }

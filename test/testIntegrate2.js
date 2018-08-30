@@ -32,6 +32,25 @@ function start() {
   let tx = {
     "type": "start",
     "marketId": marketId,
+    "startInfo": {
+      "question": "Who will win FIFA 2018?",
+      "outcomes": [
+        "england",
+        "italy",
+        "brazil",
+        "germany"
+      ],
+      "oracle": ["9x2yu6AzwWphm3j6h9pTaJh63h5ioG8RL","5wvwWgKP3Qfw1akQoXWg4NtKmzx5v4dTj"], // addresses of approved oracles
+      // meta data about oracle.  eg. description
+      "oracleMeta": "http://data.com/oracleinfo",
+      "phaseTime":{
+        "marketStart":9,"marketEnd":3609,
+        "oracleStart":3610,"oracleEnd":7210,
+        "challengeStart":7211,"challengeEnd":10811,
+        "voteStart":10812,"voteEnd":14412,
+        "distributeStart":14413,"distributeEnd":18013
+      },
+    },
   };
   
   return sendTx(tx, privAlice);  
