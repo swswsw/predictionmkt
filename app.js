@@ -176,6 +176,8 @@ function txBetHandler(state, tx, chainInfo) {
       let marketId = cloned.marketId;
       let user = cloned.user;
       let amount = new BigNumber(cloned.amount);
+      delete cloned.from;
+      delete cloned.to;
       // lock up their staking tokens
       state.balances[user] = new BigNumber(state.balances[user]).minus(amount).toNumber();
       marketSelector(state, marketId).bets.push(cloned);
