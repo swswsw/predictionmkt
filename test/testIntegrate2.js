@@ -107,25 +107,21 @@ function main() {
   
   function step20() {
     bet1();
+    bet2();
     setTimeout(step30, 10000);
   }
 
   function step30() {
-    bet2();
+    oracle();
     setTimeout(step40, 10000);
   }
 
   function step40() {
-    oracle();
+    challenge();
     setTimeout(step50, 10000);
   }
 
   function step50() {
-    challenge();
-    setTimeout(step60, 10000);
-  }
-
-  function step60() {
     vote1();
     vote2();
     vote3();

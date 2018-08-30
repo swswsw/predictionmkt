@@ -85,20 +85,16 @@ function main() {
   
   function step20() {
     bet1();
+    bet2();
     setTimeout(step30, 10000);
   }
 
   function step30() {
-    bet2();
-    setTimeout(step40, 10000);
-  }
-
-  function step40() {
     oracle();
-    setTimeout(step50, 10000);
+    setTimeout(step100, 10000);
   }
 
-  function step50() {
+  function step100() {
     distribute();
   }
 
