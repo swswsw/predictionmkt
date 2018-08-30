@@ -170,14 +170,13 @@ function txBetHandler(state, tx, chainInfo) {
       if (!verifyResult.verified) {
         console.log('invalid signature!');
         throw Error('invalid signature!');
-      }  
+      }
+      cleanSignature(cloned);
       
       console.log("signature verified!");
       let marketId = cloned.marketId;
       let user = cloned.user;
       let amount = new BigNumber(cloned.amount);
-      delete cloned.from;
-      delete cloned.to;
       // lock up their staking tokens
       state.balances[user] = new BigNumber(state.balances[user]).minus(amount).toNumber();
       marketSelector(state, marketId).bets.push(cloned);
@@ -201,6 +200,7 @@ function txOracleHandler(state, tx, chainInfo) {
         console.log('invalid signature!');
         throw Error('invalid signature!');
       }
+      cleanSignature(cloned);
 
       let marketId = cloned.marketId;
       marketSelector(state, marketId).oracleOutcome = cloned.outcome;
@@ -224,6 +224,7 @@ function txChallengeHandler(state, tx, chainInfo) {
         console.log('invalid signature!');
         throw Error('invalid signature!');
       }
+      cleanSignature(cloned);
 
       let marketId = cloned.marketId;
       let user = cloned.user;
@@ -262,6 +263,7 @@ function txVoteHandler(state, tx, chainInfo) {
         console.log('invalid signature!');
         throw Error('invalid signature!');
       }
+      cleanSignature(cloned);
 
       let marketId = cloned.marketId;
       let user = cloned.user;
@@ -307,6 +309,7 @@ function txDistributeHandler(state, tx, chainInfo) {
         console.log('invalid signature!');
         throw Error('invalid signature!');
       }
+      cleanSignature(cloned);
 
       let marketId = cloned.marketId;
 
@@ -638,6 +641,18 @@ function doPayout(voteOrBet, finalOutcome, bets, state, marketId) {
     LocalContractStorage.setValue(keywords.payoutsInfo, payouts);
     Event.Trigger(keywords.eventKey, "payouts: " + JSON.stringify(payouts));
   }
+}
+
+/**
+ * remove from and to from the tx.
+ * from contains public key and signature, which are buffer.
+ * saving buffer into state may cause issue.  the state only seems to handle primitive type. 
+ * so we have to clean it up.
+ * @param {*} tx 
+ */
+function cleanSignature(tx) {
+  delete tx.from;
+  delete tx.to;
 }
 
 /**
