@@ -118,7 +118,16 @@ function main() {
   }
 
 }
-main();
+//main();
+
+async function main2() {
+  await start();
+  await bet1();
+  await bet2();
+  await oracle();
+  await distribute();
+}
+main2();
 
 
 
