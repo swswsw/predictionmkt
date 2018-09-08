@@ -16,7 +16,7 @@ async function sendTx (tx, privkey) {
   signTx(tx, privkey);  
 
   let res = await post('http://localhost:3000/txs', tx);
-  console.log("tx resp", res.data);
+  console.log("tx resp: ", res.data);
   return res.data;
 }
 
@@ -58,7 +58,17 @@ function signTx(tx, privkey) {
   console.log("signature hex: ", sigHex);
 }
 
+async function getState() {
+  let res = await get('http://localhost:3000/state');
+  console.log("state: ", res.data);
+  return res.data;
+}
+
 module.exports = {
   sendTx: sendTx,
   signTx: signTx,
+  getState: getState,
 }
+
+// unit-test
+getState();
