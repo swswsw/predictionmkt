@@ -2,8 +2,9 @@
  * a simple straight forward path.  with challenge and vote.
  */
 let secp = require('secp256k1');
+let test = require('tape');
 let { sha256, addressHash } = require('../common.js');
-let { sendTx, signTx } = require('./testCommon.js');
+let { sendTx, signTx, getState } = require('./testCommon.js');
 
 // do a simple path of 
 // start
@@ -113,6 +114,12 @@ function distribute() {
 }
 
 async function main() {
+  let state = await getState();
+  console.log("state: ", state);
+  let balanceAliceBefore = state.balances[addrAlice];
+  let balanceBobBefore = state.balances[addrBob];
+  let balanceCarolBefore = state.balances[addrCarol];
+
   await start();
   await bet1();
   await bet2();
@@ -122,6 +129,30 @@ async function main() {
   await vote2();
   await vote3();
   await distribute();
+
+  state = await getState();
+  console.log("state: ", state);
+  // note: cannot use await inside tape test function.
+  // also, when there is async function, we cannot declare test twice with tape.
+  // we will get "Error: test exited without ending" if we declare tape test twice 
+  // with the async function.
+  // https://github.com/substack/tape/issues/160
+  test("integration test path 1: ", function(t) {
+    t.notEqual(typeof(state.market[marketId]), 'undefined', "market is created");
+
+    let market = state.market[marketId];
+
+    // final balance of alice is -85.  
+    // alice bet 10, bob bet 10, she will get +10 from bob's bet
+    // alice challenges with 100.  she will lose that. -100
+    // alice vote 1000, bob vote 10, carol vote 1000.  alice will get +5 from part of bob's staking.
+    // alice will get +10 - 100 + 5 = -85.
+    t.equal(state.balances[addrAlice], (balanceAliceBefore - 85), "alice final balance");
+    t.equal(state.balances[addrBob], (balanceBobBefore - 20), "bob final balance");
+    t.equal(state.balances[addrCarol], (balanceCarolBefore + 5), "carol final balance");
+
+    t.end();
+  });
 }
 main();
 
