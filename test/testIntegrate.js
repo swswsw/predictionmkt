@@ -90,44 +90,14 @@ function distribute() {
   return sendTx(tx, privBob);
 }
 
-function main() {
-  // start().then(function(result){
-  //   console.log("start(): ", result);
-  //   return bet1();
-  // }).then(function(result){
-  //   console.log("bet1(): ", result);
-  //   //return bet1();
-  // })
-  
-  start();
-  setTimeout(step20, 10000);
-  
-  function step20() {
-    bet1();
-    bet2();
-    setTimeout(step30, 10000);
-  }
-
-  function step30() {
-    oracle();
-    setTimeout(step100, 10000);
-  }
-
-  function step100() {
-    distribute();
-  }
-
-}
-//main();
-
-async function main2() {
+async function main() {
   await start();
   await bet1();
   await bet2();
   await oracle();
   await distribute();
 }
-main2();
+main();
 
 
 

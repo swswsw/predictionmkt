@@ -69,6 +69,3 @@ module.exports = {
   signTx: signTx,
   getState: getState,
 }
-
-// unit-test
-getState();
