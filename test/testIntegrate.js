@@ -2,8 +2,9 @@
  * a simple straight forward path
  */
 let secp = require('secp256k1');
+let test = require('tape');
 let { sha256, addressHash } = require('../common.js');
-let { sendTx, signTx } = require('./testCommon.js');
+let { sendTx, signTx, getState } = require('./testCommon.js');
 
 // do a simple path of 
 // start
@@ -91,17 +92,34 @@ function distribute() {
 }
 
 async function main() {
-  await start();
+  let state = await getState();
+  console.log("state: ", state);
+  let balanceAliceBefore = state.balances[addrAlice];
+  let balanceBobBefore = state.balances[addrBob];
+
+  await start();  
   await bet1();
   await bet2();
   await oracle();
   await distribute();
+
+  state = await getState();
+  console.log("state: ", state);
+  // note: cannot use await inside tape test function.
+  // also, when there is async function, we cannot declare test twice with tape.
+  // we will get "Error: test exited without ending" if we declare tape test twice 
+  // with the async function.
+  // https://github.com/substack/tape/issues/160
+  test("integration test path 1: ", function(t) {
+    t.notEqual(typeof(state.market[marketId]), 'undefined');
+
+    let market = state.market[marketId];
+
+    t.equal(state.balances[addrAlice], (balanceAliceBefore - 10));
+    t.equal(state.balances[addrBob], (balanceBobBefore + 10));
+
+    t.end();
+  });
 }
 main();
-
-
-
-
-
-
 
