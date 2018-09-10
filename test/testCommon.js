@@ -5,15 +5,30 @@ let { post, get } = require('axios');
 let secp = require('secp256k1');
 let { sha256, addressHash } = require('../common.js');
 let getSigHash = require('../sigHash.js');
+let stateUtil = require('../stateUtil.js');
 
+/**
+ * sending a tx.  
+ * find out sequence first (async),
+ * then send tx (async too).
+ * @param {*} tx 
+ * @param {*} privkey 
+ */
+async function complexSendTx(tx, privkey) {
+  let pubkey = secp.publicKeyCreate(privkey); // create public key
+  let addr = addressHash(pubkey);
 
+  let state = await getState();
+  let sequence = stateUtil.getSeqForUser(state, addr);
+  return sendTx(tx, privkey, sequence);
+}
 
 /**
  * sending a tx.
  * adding pubkey and signature
  */
-async function sendTx (tx, privkey) {
-  signTx(tx, privkey);  
+async function sendTx(tx, privkey, sequence) {
+  signTx(tx, privkey, sequence);  
 
   let res = await post('http://localhost:3000/txs', tx);
   console.log("tx resp: ", res.data);
@@ -27,7 +42,7 @@ async function sendTx (tx, privkey) {
  * @param {*} tx [object][in/out]
  * @param {*} privkey 
  */
-function signTx(tx, privkey) {
+function signTx(tx, privkey, sequence) {
   // add "from" and "to" onto tx
   // "from" contains pubkey and signature
   let pubkey = secp.publicKeyCreate(privkey); // create public key
@@ -43,7 +58,7 @@ function signTx(tx, privkey) {
   }
 
   tx.from.pubkey = pubkey;
-  tx.from.sequence = 0;
+  tx.from.sequence = sequence;
 
   // sign tx
   let sigHash = getSigHash(tx)
@@ -65,6 +80,7 @@ async function getState() {
 }
 
 module.exports = {
+  complexSendTx: complexSendTx,
   sendTx: sendTx,
   signTx: signTx,
   getState: getState,

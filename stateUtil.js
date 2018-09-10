@@ -2,11 +2,14 @@
  * simple util functions related to state
  */
 
+// simple namespace
+var ns = {};
+
 /**
  * get sequence part of state
  * @param {*} state 
  */
-function getSeq(state) {
+ns.getSeq = function(state) {
   return state.seq;
 }
 
@@ -15,11 +18,11 @@ function getSeq(state) {
  * @param {*} state 
  * @param {string} user - address
  */
-function getSeqForUser(state, user) {
-  return getSeq(state)[user];
+ns.getSeqForUser = function(state, user) {
+  return ns.getSeq(state)[user];
 }
 
-function getBalances(state) {
+ns.getBalances = function(state) {
   return state.balances;
 }
 
@@ -28,11 +31,11 @@ function getBalances(state) {
  * @param {*} state 
  * @param {string} user - address 
  */
-function getBalancesForUser(state, user) {
-  return getBalances(state)[user];
+ns.getBalancesForUser = function(state, user) {
+  return ns.getBalances(state)[user];
 }
 
-function getMarket(state) {
+ns.getMarket = function(state) {
   return state.market;
 }
 
@@ -41,7 +44,14 @@ function getMarket(state) {
  * @param {*} state 
  * @param {string} marketId
  */
-function getMarketForId(state, marketId) {
-  return getMarket(state)[marketId];
+ns.getMarketForId = function(state, marketId) {
+  return ns.getMarket(state)[marketId];
 }
 
+
+// Export all in ns namespace
+for(prop in ns) {
+  if(ns.hasOwnProperty(prop)) {
+    module.exports[prop] = ns[prop];
+  }
+}

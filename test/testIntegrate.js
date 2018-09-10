@@ -4,7 +4,7 @@
 let secp = require('secp256k1');
 let test = require('tape');
 let { sha256, addressHash } = require('../common.js');
-let { sendTx, signTx, getState } = require('./testCommon.js');
+let { complexSendTx, sendTx, signTx, getState } = require('./testCommon.js');
 
 // do a simple path of 
 // start
@@ -52,7 +52,7 @@ function start() {
     },
   };
   
-  return sendTx(tx, privAlice);  
+  return complexSendTx(tx, privAlice);  
 }
 
 function bet1() {
@@ -64,7 +64,7 @@ function bet1() {
     "user": addrAlice,
   };
 
-  return sendTx(tx, privAlice);
+  return complexSendTx(tx, privAlice);
 }
 
 function bet2() {
@@ -76,19 +76,19 @@ function bet2() {
     "user": addrBob,
   };
 
-  return sendTx(tx, privBob);
+  return complexSendTx(tx, privBob);
 }
 
 function oracle() {
   let tx = {"type": "oracle", "marketId": marketId, "outcome": 2};
 
-  return sendTx(tx, privBob);
+  return complexSendTx(tx, privBob);
 }
 
 function distribute() {
   let tx = { "type": "distribute", "marketId": marketId }
 
-  return sendTx(tx, privBob);
+  return complexSendTx(tx, privBob);
 }
 
 async function main() {

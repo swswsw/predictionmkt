@@ -38,6 +38,11 @@ let initialState = {
     '9x2yu6AzwWphm3j6h9pTaJh63h5ioG8RL': 10000,
     't6bUAUxNh8xoZzt6YZdQn27J4DSiR2oH': 10000,
   },
+
+  // store the current sequence of the user.
+  seq: {
+
+  }
 }
 
 /*

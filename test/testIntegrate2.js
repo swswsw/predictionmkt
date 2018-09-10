@@ -4,7 +4,7 @@
 let secp = require('secp256k1');
 let test = require('tape');
 let { sha256, addressHash } = require('../common.js');
-let { sendTx, signTx, getState } = require('./testCommon.js');
+let { complexSendTx, sendTx, signTx, getState } = require('./testCommon.js');
 
 // do a simple path of 
 // start
@@ -54,7 +54,7 @@ function start() {
     },
   };
   
-  return sendTx(tx, privAlice);  
+  return complexSendTx(tx, privAlice);  
 }
 
 function bet1() {
@@ -66,7 +66,7 @@ function bet1() {
     "user": addrAlice,
   };
 
-  return sendTx(tx, privAlice);
+  return complexSendTx(tx, privAlice);
 }
 
 function bet2() {
@@ -78,39 +78,39 @@ function bet2() {
     "user": addrBob,
   };
 
-  return sendTx(tx, privBob);
+  return complexSendTx(tx, privBob);
 }
 
 function oracle() {
   let tx = {"type": "oracle", "marketId": marketId, "outcome": 2};
 
-  return sendTx(tx, privBob);
+  return complexSendTx(tx, privBob);
 }
 
 function challenge() {
   let tx = {"type": "challenge", "marketId": marketId, "user": addrAlice, "amount": 100};
-  return sendTx(tx, privAlice);
+  return complexSendTx(tx, privAlice);
 }
 
 function vote1() {
   let tx = {"type": "vote", "marketId": marketId, "user": addrAlice, "amount": 1000, "outcome": 1};
-  return sendTx(tx, privAlice);
+  return complexSendTx(tx, privAlice);
 }
 
 function vote2() {
   let tx = {"type": "vote", "marketId": marketId, "user": addrBob, "amount": 10, "outcome": 2};
-  return sendTx(tx, privBob);
+  return complexSendTx(tx, privBob);
 }
 
 function vote3() {
   let tx = {"type": "vote", "marketId": marketId, "user": addrCarol, "amount": 1000, "outcome": 1};
-  return sendTx(tx, privCarol);
+  return complexSendTx(tx, privCarol);
 }
 
 function distribute() {
   let tx = { "type": "distribute", "marketId": marketId }
 
-  return sendTx(tx, privBob);
+  return complexSendTx(tx, privBob);
 }
 
 async function main() {
