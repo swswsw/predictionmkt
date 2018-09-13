@@ -19,7 +19,8 @@ async function complexSendTx(tx, privkey) {
   let addr = addressHash(pubkey);
 
   let state = await getState();
-  let sequence = stateUtil.getSeqForUser(state, addr);
+  let sequence = stateUtil.getSeqForUser(state, addr) || 0;
+  console.log("sequence: ", sequence);  
   return sendTx(tx, privkey, sequence);
 }
 
