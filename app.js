@@ -238,6 +238,15 @@ function txOracleHandler(state, tx, chainInfo) {
       cleanSignature(cloned);
 
       let marketId = cloned.marketId;
+
+      // check if oracle is from approved oracle list.
+      let approvedOracles = marketSelector(state, marketId).startInfo.oracle;
+      if (!approvedOracles.includes(verifyResult.address)) {
+        let msg = "only oracle from approved list can submit oracle result";
+        console.log(msg);
+        throw Error(msg);
+      }
+
       marketSelector(state, marketId).oracleOutcome = cloned.outcome;
       console.log("oracleOutcome: ", marketSelector(state, marketId).oracleOutcome);
     } else {
@@ -539,10 +548,10 @@ function verifySig(state, tx) {
       // if sequence is not yet recorded, set sequence to the new value
       // else, increment seq so other people cannot replay the tx.
       if (typeof seq === "undefined") {
-        state.seq[fromAddr] = STARTING_SEQ + 1;
+        stateUtil.setSeqForUser(state, fromAddr, STARTING_SEQ + 1);
       } else {
-        state.seq[fromAddr] = seq + 1; // seq = seq + 1; won't work 
-        //seq = seq + 1; // this seq is a proxy if it is not undefined.
+        stateUtil.setSeqForUser(state, fromAddr, seq + 1); // seq = seq + 1; won't work 
+        //state.seq[fromAddr] = seq + 1; // seq = seq + 1; won't work 
       }
     }
   }

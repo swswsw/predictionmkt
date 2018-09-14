@@ -85,6 +85,15 @@ function oracle() {
   return complexSendTx(tx, privBob);
 }
 
+/**
+ * this should fail because carol is not in the approved oracle list
+ */
+function oracle2() {
+  let tx = {"type": "oracle", "marketId": marketId, "outcome": 3};
+
+  return complexSendTx(tx, privCarol);
+}
+
 function distribute() {
   let tx = { "type": "distribute", "marketId": marketId }
 
@@ -101,6 +110,7 @@ async function main() {
   await bet1();
   await bet2();
   await oracle();
+  await oracle2();
   await distribute();
 
   state = await getState();
@@ -115,8 +125,10 @@ async function main() {
 
     let market = state.market[marketId];
 
-    t.equal(state.balances[addrAlice], (balanceAliceBefore - 10));
-    t.equal(state.balances[addrBob], (balanceBobBefore + 10));
+    t.equal(state.balances[addrAlice], (balanceAliceBefore - 10), "alice final balance");
+    t.equal(state.balances[addrBob], (balanceBobBefore + 10), "bob final balance");
+
+    t.equal(market.oracleOutcome, 2, "oracle outcome");
 
     t.end();
   });
