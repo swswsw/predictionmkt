@@ -3,6 +3,9 @@ let BigNumber = require('bignumber.js'); // https://github.com/MikeMcl/bignumber
 let secp = require('secp256k1');
 let { sha256, addressHash } = require('./common.js');
 let getSigHash = require('./sigHash.js');
+let stateUtil = require('./stateUtil.js');
+
+const STARTING_SEQ = 0;
 
 // market state template.
 // every market will have a state like this.
@@ -134,10 +137,10 @@ function txVerifySigHandler(state, tx, chainInfo) {
   if (tx.type === "verifySig") {
     let cloned = Object.assign({}, tx);
     console.log("verifySig tx: ", JSON.stringify(cloned));
-    let verifyResult = verifySig(tx);
+    let verifyResult = verifySig(state, cloned);
     if (!verifyResult.verified) {
       console.log('invalid signature!');
-      throw Error("invalid signature");
+      throw Error("invalid signature!");
     }
 
     console.log("signature verified!");
@@ -198,7 +201,7 @@ function txBetHandler(state, tx, chainInfo) {
       let cloned = Object.assign({}, tx);
       console.log("bet: ", JSON.stringify(cloned));
 
-      let verifyResult = verifySig(cloned);
+      let verifyResult = verifySig(state, cloned);
       if (!verifyResult.verified) {
         console.log('invalid signature!');
         throw Error('invalid signature!');
@@ -227,7 +230,7 @@ function txOracleHandler(state, tx, chainInfo) {
       let cloned = Object.assign({}, tx);
       console.log("oracle tx: ", JSON.stringify(cloned));
 
-      let verifyResult = verifySig(cloned);
+      let verifyResult = verifySig(state, cloned);
       if (!verifyResult.verified) {
         console.log('invalid signature!');
         throw Error('invalid signature!');
@@ -251,7 +254,7 @@ function txChallengeHandler(state, tx, chainInfo) {
       let cloned = Object.assign({}, tx);
       console.log("challenge tx: ", JSON.stringify(cloned));
 
-      let verifyResult = verifySig(cloned);
+      let verifyResult = verifySig(state, cloned);
       if (!verifyResult.verified) {
         console.log('invalid signature!');
         throw Error('invalid signature!');
@@ -290,7 +293,7 @@ function txVoteHandler(state, tx, chainInfo) {
       let cloned = Object.assign({}, tx);
       console.log("vote tx", JSON.stringify(cloned));
 
-      let verifyResult = verifySig(cloned);
+      let verifyResult = verifySig(state, cloned);
       if (!verifyResult.verified) {
         console.log('invalid signature!');
         throw Error('invalid signature!');
@@ -336,7 +339,7 @@ function txDistributeHandler(state, tx, chainInfo) {
       let cloned = Object.assign({}, tx);
       console.log("distribute tx", JSON.stringify(cloned));
 
-      let verifyResult = verifySig(cloned);
+      let verifyResult = verifySig(state, cloned);
       if (!verifyResult.verified) {
         console.log('invalid signature!');
         throw Error('invalid signature!');
@@ -446,7 +449,7 @@ function txSendHandler(state, tx, chainInfo) {
     let from = cloned.from;
     let amount = new BigNumber(from.amount);
 
-    let verifyResult = verifySig(cloned);
+    let verifyResult = verifySig(state, cloned);
     if (!verifyResult.verified) {
       console.log('invalid signature!');
       throw Error('invalid signature!');
@@ -482,6 +485,17 @@ function send(state, from, to, amount) {
 }
 
 /**
+ * verify that seq in state matches seq in tx.
+ * @param {*} state 
+ * @param {string} user 
+ */
+function verifySeq(state, user, sequence) {
+  let seq = stateUtil.getSeqForUser(state, user);
+  return (typeof sequence !== "undefined")
+    && ((typeof seq === "undefined" && sequence === STARTING_SEQ) || (sequence === seq));
+}
+
+/**
  * verify is signature is correct.  
  * 
  * @param {*} tx 
@@ -489,20 +503,23 @@ function send(state, from, to, amount) {
  * verified is true if signature is verified.  and if user is provided, addr is same as user.
  * address is the address derived form the public key provided in tx.from.pubkey.
  */
-function verifySig(tx) {
+function verifySig(state, tx) {
   let verified = false;
   let addrSame = true;
+  let seqVerified = false;
   let cloned = Object.assign({}, tx);
   console.log("verifySig tx: ", JSON.stringify(cloned));
   let from = cloned.from;
   let pubkey = from.pubkey;
   let signature = from.signature;
+  let fromSequence = from.sequence;
   let sigHash = getSigHash(tx);
   let fromAddr = addressHash(pubkey);
   console.log("pubkey: ", pubkey);
   console.log("signature: ", signature);
   console.log("sigHash: ", sigHash);
   console.log("from addr: ", fromAddr);
+  console.log("from sequence: ", fromSequence);
   let user = cloned.user;
   if (typeof cloned.user !== "undefined") {
     addrSame = (fromAddr == user);
@@ -515,9 +532,22 @@ function verifySig(tx) {
   } else {
     console.log("signature verified!  ***");
     verified = true;
+
+    seqVerified = verifySeq(state, fromAddr, fromSequence);
+    if (seqVerified) {
+      let seq = stateUtil.getSeqForUser(state, fromAddr);
+      // if sequence is not yet recorded, set sequence to the new value
+      // else, increment seq so other people cannot replay the tx.
+      if (typeof seq === "undefined") {
+        state.seq[fromAddr] = STARTING_SEQ + 1;
+      } else {
+        state.seq[fromAddr] = seq + 1; // seq = seq + 1; won't work 
+        //seq = seq + 1; // this seq is a proxy if it is not undefined.
+      }
+    }
   }
 
-  return {"verified": (verified && addrSame), "address": fromAddr};
+  return {"verified": (verified && addrSame && seqVerified), "address": fromAddr};
 }
 
 

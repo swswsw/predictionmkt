@@ -22,6 +22,16 @@ ns.getSeqForUser = function(state, user) {
   return ns.getSeq(state)[user];
 }
 
+/**
+ * set sequence for a specific user
+ * @param {*} state 
+ * @param {*} user 
+ * @param {*} sequence 
+ */
+ns.setSeqForUser = function(state, user, sequence) {
+  ns.getSeq(state)[user] = sequence;
+}
+
 ns.getBalances = function(state) {
   return state.balances;
 }
