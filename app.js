@@ -371,7 +371,7 @@ function txDistributeHandler(state, tx, chainInfo) {
         // sum up voting pool.
         // give it to the winners proportionally.
         let voteRecords = marketSelector(state, marketId).voteRecords;
-        console.log("1");
+
         let votePoolTotal = new BigNumber(0);
         let result = {};
 
@@ -417,7 +417,6 @@ function txDistributeHandler(state, tx, chainInfo) {
       }
 
       // distribute the original bet pool to the people
-      console.log("5");
       // let betPoolTotal = 0;
       let bets = marketSelector(state, marketId).bets;
       // for (let j = 0; j < bets.length; j++) {
@@ -425,11 +424,9 @@ function txDistributeHandler(state, tx, chainInfo) {
       //   let bet = bets[j];
       //   betPoolTotal += bet.amount;
       // }
-      console.log("10");
       
       doPayout("bet", finalOutcome, bets, state, marketId);
 
-      console.log("11");
 
 
       // if (challenged)
