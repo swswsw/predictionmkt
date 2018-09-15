@@ -794,6 +794,46 @@ function isInPhase(blockHeight, phase, state) {
   return result;
 }
 
+
+const MAX_TYPE_LENGTH = 30;
+const MAX_USER_LENGTH = 64;
+const SIG_SIZE = 0; // todo
+const PUBKEY_SIZE = 0; // todo
+
+/**
+ * some common tx checking
+ * throw error if not passing
+ * 1. type string length <= 30
+ * 2. user string length <= 64
+ * todo:
+ * 3. from.signature size
+ * 4. from.pubkey size
+ * 5.  
+ */
+function checkTxCommon(tx) {
+  if (tx.type.length <= MAX_TYPE_LENGTH) { throw new Error("type too long"); }
+  if (tx.user.length <= MAX_USER_LENGTH) { throw new Error("user too long"); }
+}
+
+const MAX_START_INFO_LENGTH = 1024;
+
+/**
+ * total size of startInfo < 1024
+ * oracle is defined 
+ * oracle is an array
+ * question is provided
+ * outcomes is provided
+ * 
+ * throw error if not passing
+ */
+function checkStartInfo(startInfo) {
+  let sStartInfo = JSON.stringify(startInfo);
+  if (sStartInfo > MAX_START_INFO_LENGTH) { throw new Error("startInfo too large"); }
+  if (!Array.isArray(startInfo.oracle)) { throw new Error("startInfo.oracle must be an array"); }
+  if (!startInfo.question) { throw new Error("startInfo.question is required"); }
+  if (!startInfo.outcomes) { throw new Error("startInfo.outcomes is required"); }
+}
+
 /*
 
 prediction market
