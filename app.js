@@ -150,6 +150,7 @@ function txVerifySigHandler(state, tx, chainInfo) {
 function txHandler1(state, tx, chainInfo) {
   console.log("tx: ", JSON.stringify(tx));
   //console.log(chainInfo);
+  checkTxCommon(tx); // this is always called, so we check it here.
 }
 
 function txHandler2(state, tx, chainInfo) {
@@ -164,6 +165,8 @@ function txStartHandler(state, tx, chainInfo) {
     console.log("start: ", JSON.stringify(cloned));
     let marketId = cloned.marketId;
     let startInfo = cloned.startInfo;
+  
+    checkStartInfo(startInfo);
 
     // check marketId does not exist yet
     if (typeof (state.market[marketId]) === 'undefined') {
@@ -811,8 +814,8 @@ const PUBKEY_SIZE = 0; // todo
  * 5.  
  */
 function checkTxCommon(tx) {
-  if (tx.type.length <= MAX_TYPE_LENGTH) { throw new Error("type too long"); }
-  if (tx.user.length <= MAX_USER_LENGTH) { throw new Error("user too long"); }
+  if (tx.type.length > MAX_TYPE_LENGTH) { throw new Error("type too long"); }
+  if (typeof tx.user !== "undefined" && tx.user.length > MAX_USER_LENGTH) { throw new Error("user too long"); }
 }
 
 const MAX_START_INFO_LENGTH = 1024;
@@ -829,6 +832,7 @@ const MAX_START_INFO_LENGTH = 1024;
 function checkStartInfo(startInfo) {
   let sStartInfo = JSON.stringify(startInfo);
   if (sStartInfo > MAX_START_INFO_LENGTH) { throw new Error("startInfo too large"); }
+  if (typeof startInfo.oracle === "undefined") { throw new Error("startInfo.oracle is required"); }
   if (!Array.isArray(startInfo.oracle)) { throw new Error("startInfo.oracle must be an array"); }
   if (!startInfo.question) { throw new Error("startInfo.question is required"); }
   if (!startInfo.outcomes) { throw new Error("startInfo.outcomes is required"); }

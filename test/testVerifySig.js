@@ -48,10 +48,11 @@ async function main () {
 
 
   let res = await post('http://localhost:3000/txs', tx);
-  console.log("tx resp", res.data);
+  console.log("tx resp: ", res.data);
+  console.log("tx resp log: ", res.data.result.check_tx.log);
   
-  test("tx valid", function(t){
-    t.notEqual(res.data.result.height, 0, "response is valid");
+  test("verify sig", function(t){
+    t.notEqual(res.data.result.height, 0, "check tx validity");
     t.end();
   });
 
