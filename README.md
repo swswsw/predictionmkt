@@ -66,7 +66,41 @@ run
 
 test invocation:
 
-> curl -X POST http://localhost:3000/txs -d '{"type": "start", "marketId": "market2"}'
+it is possible to do test invocation using curl.  however, you will need to supply signature yourself.  
+it is recommended to use test/testCommon.js complexSendTx(), which will handle the signature, pubkey, and sequence.  
+
+for example of test invocation, please see test/testIntegrate2.js
+
+--------
+
+if you need to use curl to send a tx, you need to supply from.pubkey, from.signature, from.sequence, and to.  the format is as follows.
+> curl -X POST http://localhost:3000/txs -d '{"type": "verifySig", "from": { "pubkey": "rewlkjrlw", "signature": "rewlkajrlewk", "sequence": 0 }, "to": {} }'
+
+all of the tx will need from and to.  however, for brevity purpose, they are omitted in the following calls:
+
+> curl -X POST http://localhost:3000/txs -d '{"type": "start", "marketId": "market2", "startInfo": ...}'
+example startInfo:
+```
+  "startInfo": {
+      "question": "Who will win FIFA 2018?",
+      "outcomes": [
+        "england",
+        "italy",
+        "brazil",
+        "germany"
+      ],
+      "oracle": ["9x2yu6AzwWphm3j6h9pTaJh63h5ioG8RL","5wvwWgKP3Qfw1akQoXWg4NtKmzx5v4dTj"], // addresses of approved oracles
+      // meta data about oracle.  eg. description
+      "oracleMeta": "http://data.com/oracleinfo",
+      "phaseTime":{
+        "marketStart":9,"marketEnd":3609,
+        "oracleStart":3610,"oracleEnd":7210,
+        "challengeStart":7211,"challengeEnd":10811,
+        "voteStart":10812,"voteEnd":14412,
+        "distributeStart":14413,"distributeEnd":18013
+      },
+    }
+```
 
 > curl -X POST http://localhost:3000/txs -d '{"type": "bet", "marketId": "market2", "outcome": 1, "amount": 10, "user": "5wvwWgKP3Qfw1akQoXWg4NtKmzx5v4dTj"}'
 
@@ -84,7 +118,6 @@ test invocation:
 
 > curl -X POST http://localhost:3000/txs -d '{"type": "distribute", "marketId": "market2"}'
 
-> curl -X POST http://localhost:3000/txs -d '{"type": "verifySig", "from": { "pubkey": "rewlkjrlw", "signature": "rewlkajrlewk", "sequence": 0 }, "to": {} }'
-this will return "", but that's normal.  you can see whether signature is verified from the the server log
+for send tx, see test/testSend.js for example of tx format.
 
 ## update
