@@ -7,7 +7,7 @@ test('test doPayout for bets', function(t) {
   let doPayout = mainapp.__get__('doPayout');
 
   let bets = [{"amount":10,"outcome":1,"type":"bet","user":"alice"},{"amount":10,"outcome":2,"type":"bet","user":"bob"}];
-  let state = {"market":{"market1":{"id":"","phaseTime":{},"bets":[],"oracles":[],"oracleOutcome":-1,"voteRecords":[],"payoutRatio":1.5},"market2":{"id":"market2","phaseTime":{"marketStart":9,"marketEnd":3609,"oracleStart":3610,"oracleEnd":7210,"challengeStart":7211,"challengeEnd":10811,"voteStart":10812,"voteEnd":14412,"distributeStart":14413,"distributeEnd":18013},"bets":[{"amount":10,"marketId":"market2","outcome":1,"type":"bet","user":"alice"},{"amount":10,"marketId":"market2","outcome":2,"type":"bet","user":"bob"}],"oracles":[],"oracleOutcome":1,"voteRecords":[],"payoutRatio":1.5}},"balances":{"alice":9990,"bob":9990,"carol":10000}};
+  let state = {"market":{"market1":{"id":"","phaseTime":{},"bets":[],"oracles":[],"oracleOutcome":-1,"voteRecords":[],"payoutRatio":1.5},"market2":{"id":"market2","phaseTime":{"marketStart":9,"marketEnd":3609,"oracleStart":3610,"oracleEnd":7210,"challengeStart":7211,"challengeEnd":10811,"voteStart":10812,"voteEnd":14412,"distributeStart":14413,"distributeEnd":18013},"bets":[{"amount":10,"marketId":"market2","outcome":1,"type":"bet","user":"alice"},{"amount":10,"marketId":"market2","outcome":2,"type":"bet","user":"bob"}],"oracles":[],"oracleOutcome":1,"voteRecords":[],"payoutRatio":1.5,"storage":{},}},"balances":{"alice":9990,"bob":9990,"carol":10000}};
 
   doPayout("bet", 1, bets, state, "market2");
 
@@ -139,7 +139,8 @@ test('test doPayout for votes', function(t) {
             "user": "alice"
           }
         ],
-        "payoutRatio": 1.5
+        "payoutRatio": 1.5,
+        "storage": {},
       }
     },
     "balances": {
