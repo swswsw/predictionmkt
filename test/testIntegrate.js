@@ -112,6 +112,7 @@ async function main() {
   await oracle();
   await oracle2();
   await distribute();
+  await distribute(); // calling it twice should not cause problem.  second distribute should be ignored.
 
   state = await getState();
   console.log("state: ", state);

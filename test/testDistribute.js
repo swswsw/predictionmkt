@@ -147,3 +147,121 @@ test('test distribute for situation with vote', function(t) {
 
   t.end();
 });
+
+test('test calling distribute again. distribute can only be called once.', function(t) {
+  let txDistributeHandler = mainapp.__get__('txDistributeHandler');
+
+  // storage.payouts is in the state,
+  // which indicates that distribute is called.  
+  let state = 
+  {
+    "market": {
+      "m1537251525926": {
+        "id": "m1537251525926",
+        "phaseTime": {
+          "challengeEnd": 10811,
+          "challengeStart": 7211,
+          "distributeEnd": 18013,
+          "distributeStart": 14413,
+          "marketEnd": 3609,
+          "marketStart": 9,
+          "oracleEnd": 7210,
+          "oracleStart": 3610,
+          "voteEnd": 14412,
+          "voteStart": 10812
+        },
+        "bets": [
+          {
+            "amount": 10,
+            "marketId": "m1537251525926",
+            "outcome": 1,
+            "type": "bet",
+            "user": "5wvwWgKP3Qfw1akQoXWg4NtKmzx5v4dTj"
+          },
+          {
+            "amount": 10,
+            "marketId": "m1537251525926",
+            "outcome": 2,
+            "type": "bet",
+            "user": "9x2yu6AzwWphm3j6h9pTaJh63h5ioG8RL"
+          }
+        ],
+        "oracles": [
+          
+        ],
+        "oracleOutcome": 2,
+        "voteRecords": [
+          
+        ],
+        "payoutRatio": 1.5,
+        "storage": {
+          "distribution": {
+            "betPoolTotal": "20",
+            "winnerPoolTotal": "10"
+          },
+          "payouts": [
+            {
+              "user": "9x2yu6AzwWphm3j6h9pTaJh63h5ioG8RL",
+              "betAmount": "10",
+              "payoutAmount": "20"
+            }
+          ]
+        },
+        "startInfo": {
+          "oracle": [
+            "9x2yu6AzwWphm3j6h9pTaJh63h5ioG8RL",
+            "5wvwWgKP3Qfw1akQoXWg4NtKmzx5v4dTj"
+          ],
+          "oracleMeta": "http:\/\/data.com\/oracleinfo",
+          "outcomes": [
+            "england",
+            "italy",
+            "brazil",
+            "germany"
+          ],
+          "phaseTime": {
+            "challengeEnd": 10811,
+            "challengeStart": 7211,
+            "distributeEnd": 18013,
+            "distributeStart": 14413,
+            "marketEnd": 3609,
+            "marketStart": 9,
+            "oracleEnd": 7210,
+            "oracleStart": 3610,
+            "voteEnd": 14412,
+            "voteStart": 10812
+          },
+          "question": "Who will win FIFA 2018?"
+        }
+      }
+    },
+    "balances": {
+      "5wvwWgKP3Qfw1akQoXWg4NtKmzx5v4dTj": 9990,
+      "9x2yu6AzwWphm3j6h9pTaJh63h5ioG8RL": 10010,
+      "t6bUAUxNh8xoZzt6YZdQn27J4DSiR2oH": 10000
+    },
+    "seq": {
+      "5wvwWgKP3Qfw1akQoXWg4NtKmzx5v4dTj": 1,
+      "9x2yu6AzwWphm3j6h9pTaJh63h5ioG8RL": 3
+    }
+  }
+  ;
+
+  let tx = {"type": "distribute", "marketId": "m1537251525926"};
+  let privAlice = Buffer.from("ebca1fcfba3e09e865613a87a3814813ab932936885c1b0495f1c05c7e21b1fc", "hex"); // alice's private key
+  let sequence = 0;
+  signTx(tx, privAlice, sequence); // need to add signature to tx
+  let chainInfo = {height: 0}; // not used when we are in test mode that does not check for phase
+
+  txDistributeHandler(state, tx, chainInfo);
+
+  // the state contains storage.payouts.  which means distribute has already completed.
+  // so calling distribute again should receive an error.
+  // the balance should be the same as before.  
+  t.equals(state.balances["5wvwWgKP3Qfw1akQoXWg4NtKmzx5v4dTj"], 9990, "alice balance");
+  t.equals(state.balances["9x2yu6AzwWphm3j6h9pTaJh63h5ioG8RL"], 10010, "bob balance");
+  t.equals(state.balances["t6bUAUxNh8xoZzt6YZdQn27J4DSiR2oH"], 10000, "carol balance");
+  
+
+  t.end();
+});

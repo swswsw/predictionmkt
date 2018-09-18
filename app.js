@@ -363,6 +363,14 @@ function txDistributeHandler(state, tx, chainInfo) {
 
       let localContractStorage = new LocalContractStorage(state, marketId);
 
+      // check that distribute hasn't been completed already
+      let checkValue = localContractStorage.getValue("payouts");
+      if (typeof checkValue !== "undefined") {
+        let msg = "distribute cannot be invoked again";
+        console.log(msg);
+        throw new Error(msg);
+      }
+
       // do final calculation and distribute the tokens accordingly.
       
       // finaloutcome is assumed to be oracleoutcome, unless there is a vote.
