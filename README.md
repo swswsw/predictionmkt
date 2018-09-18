@@ -79,6 +79,7 @@ if you need to use curl to send a tx, you need to supply from.pubkey, from.signa
 all of the tx will need from and to.  however, for brevity purpose, they are omitted in the following calls:
 
 > curl -X POST http://localhost:3000/txs -d '{"type": "start", "marketId": "market2", "startInfo": ...}'
+
 example startInfo:
 ```
   "startInfo": {
@@ -118,6 +119,6 @@ example startInfo:
 
 > curl -X POST http://localhost:3000/txs -d '{"type": "distribute", "marketId": "market2"}'
 
-for send tx, see test/testSend.js for example of tx format.
+for example of sending token to another address, see test/testSend.js for example of tx format.
 
 ## update
