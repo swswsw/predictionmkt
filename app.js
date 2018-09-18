@@ -26,6 +26,7 @@ let marketTemplate = {
   //   outcome3: 0,
   // }, // aggregated result of vote
   payoutRatio: 1.5,
+  storage: {},
 }
 
 
@@ -360,6 +361,8 @@ function txDistributeHandler(state, tx, chainInfo) {
 
       let marketId = cloned.marketId;
 
+      let localContractStorage = new LocalContractStorage(state, marketId);
+
       // do final calculation and distribute the tokens accordingly.
       
       // finaloutcome is assumed to be oracleoutcome, unless there is a vote.
@@ -393,7 +396,7 @@ function txDistributeHandler(state, tx, chainInfo) {
         console.log("votePoolTotal: ", votePoolTotal);
         //votePoolTotal = votePoolTotal + marketSelector(state, marketId).challenge.amount;
         console.log("vote result", result);
-        LocalContractStorage.setValue("voteResult", result);
+        localContractStorage.setValue("voteResult", result);
 
         // determine which outcome win.
         // loop through to find the highest voted amount
@@ -411,7 +414,7 @@ function txDistributeHandler(state, tx, chainInfo) {
         // set the final outcome to the highest voted outcome
         finalOutcome = highestOutcome;
         console.log("final voted outcome: ", finalOutcome);
-        LocalContractStorage.setValue("votedOutcome", finalOutcome);
+        localContractStorage.setValue("votedOutcome", finalOutcome);
 
         console.log("distributed vote pool");
         doPayout("vote", finalOutcome, voteRecords, state, marketId);
@@ -559,17 +562,26 @@ function verifySig(state, tx) {
   return {"verified": (verified && addrSame && seqVerified), "address": fromAddr};
 }
 
-
+/**
+ * handle a generic key-value storage space in the state.  
+ * the storage space is local to the marketId.
+ * every market has its own storage space.
+ */
 class LocalContractStorage {
 
   
-  constructor(state) {
+  constructor(state, marketId) {
     this.state = state;
+    this.marketId = marketId;
   }
 
-  static setValue(key, value) {
+  setValue(key, value) {
     // sets to the state.
-    // tbd
+    marketSelector(this.state, this.marketId).storage[key] = value;
+  }
+
+  getValue(key) {
+    return marketSelector(this.state, this.marketId).storage[key];
   }
 }
 
@@ -604,7 +616,7 @@ class Blockchain {
  * @param {string} voteOrBet 
  */
 function doPayout(voteOrBet, finalOutcome, bets, state, marketId) {
-  LocalContractStorage.state = state;
+  let localContractStorage = new LocalContractStorage(state, marketId);
 
   let keywords = {}; // keywords to multiplex between vote and bet
   if (voteOrBet === "vote") {
@@ -624,8 +636,8 @@ function doPayout(voteOrBet, finalOutcome, bets, state, marketId) {
     }
   }
 
-  //let bets = LocalContractStorage.get(keywords.betsInfo);
-  //let finalOutcome = LocalContractStorage.get("finalOutcome");
+  //let bets = localContractStorage.get(keywords.betsInfo);
+  //let finalOutcome = localContractStorage.get("finalOutcome");
   let bet;
   let user;
   let amount; // BigNumber
@@ -663,7 +675,7 @@ function doPayout(voteOrBet, finalOutcome, bets, state, marketId) {
     console.log("betPoolTotal: " + betPoolTotal + ", winnerPoolTotal: " + winnerPoolTotal);
     distribution.betPoolTotal = betPoolTotal;
     distribution.winnerPoolTotal = winnerPoolTotal;
-    LocalContractStorage.setValue(keywords.distributionInfo, distribution);
+    localContractStorage.setValue(keywords.distributionInfo, distribution);
 
 
     for (betsIdx = 0; betsIdx < bets.length; betsIdx++) {
@@ -709,7 +721,7 @@ function doPayout(voteOrBet, finalOutcome, bets, state, marketId) {
       }
     }
 
-    LocalContractStorage.setValue(keywords.payoutsInfo, payouts);
+    localContractStorage.setValue(keywords.payoutsInfo, payouts);
     Event.Trigger(keywords.eventKey, "payouts: " + JSON.stringify(payouts));
   }
 }
