@@ -368,7 +368,7 @@ function txDistributeHandler(state, tx, chainInfo) {
       if (typeof checkValue !== "undefined") {
         let msg = "distribute cannot be invoked again";
         console.log(msg);
-        throw new Error(msg);
+        throw Error(msg);
       }
 
       // do final calculation and distribute the tokens accordingly.
@@ -722,7 +722,7 @@ function doPayout(voteOrBet, finalOutcome, bets, state, marketId) {
         if (!result) {
           Event.Trigger(keywords.eventKey, "transfer failed: " + payoutAmount + " to " + user);
           console.log("transfer failed");
-          throw new Error("transfer failed.");
+          throw Error("transfer failed.");
         } else {
           Event.Trigger(keywords.eventKey, "transfer result: " + JSON.stringify(result));
         }
@@ -834,8 +834,8 @@ const PUBKEY_SIZE = 0; // todo
  * 5.  
  */
 function checkTxCommon(tx) {
-  if (tx.type.length > MAX_TYPE_LENGTH) { throw new Error("type too long"); }
-  if (typeof tx.user !== "undefined" && tx.user.length > MAX_USER_LENGTH) { throw new Error("user too long"); }
+  if (tx.type.length > MAX_TYPE_LENGTH) { throw Error("type too long"); }
+  if (typeof tx.user !== "undefined" && tx.user.length > MAX_USER_LENGTH) { throw Error("user too long"); }
 }
 
 const MAX_START_INFO_LENGTH = 1024;
@@ -851,11 +851,11 @@ const MAX_START_INFO_LENGTH = 1024;
  */
 function checkStartInfo(startInfo) {
   let sStartInfo = JSON.stringify(startInfo);
-  if (sStartInfo > MAX_START_INFO_LENGTH) { throw new Error("startInfo too large"); }
-  if (typeof startInfo.oracle === "undefined") { throw new Error("startInfo.oracle is required"); }
-  if (!Array.isArray(startInfo.oracle)) { throw new Error("startInfo.oracle must be an array"); }
-  if (!startInfo.question) { throw new Error("startInfo.question is required"); }
-  if (!startInfo.outcomes) { throw new Error("startInfo.outcomes is required"); }
+  if (sStartInfo > MAX_START_INFO_LENGTH) { throw Error("startInfo too large"); }
+  if (typeof startInfo.oracle === "undefined") { throw Error("startInfo.oracle is required"); }
+  if (!Array.isArray(startInfo.oracle)) { throw Error("startInfo.oracle must be an array"); }
+  if (!startInfo.question) { throw Error("startInfo.question is required"); }
+  if (!startInfo.outcomes) { throw Error("startInfo.outcomes is required"); }
 }
 
 /*
