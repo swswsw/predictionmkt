@@ -27,6 +27,10 @@ expressapp.get('/market', (req, res) => {
   res.render('market.html');
 });
 
+expressapp.get('/create', (req, res) => {
+  res.render('create.html');
+});
+
 expressapp.get('/profile', (req, res) => {
   res.render('profile.html');
 });
