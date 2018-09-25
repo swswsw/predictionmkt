@@ -161,9 +161,11 @@ app.use(txVoteHandler);
 app.use(txDistributeHandler);
 app.use(txSendHandler);
 
+/*
 app.listen(3000).then(function(appInfo) {
   console.log(appInfo);
 })
+*/
 
 /**
  * doesn't do anything other than verify signature.  
