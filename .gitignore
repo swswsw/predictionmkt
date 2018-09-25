@@ -59,3 +59,6 @@ typings/
 
 # visual studio code files
 .vscode/
+
+# personal files.  files that you don't want to check-in.  like perm or private keys.
+personal/
