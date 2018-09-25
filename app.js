@@ -31,11 +31,12 @@ expressapp.get('/create', (req, res) => {
   res.render('create.html');
 });
 
+
 expressapp.get('/profile', (req, res) => {
   res.render('profile.html');
 });
 
-expressapp.listen(8080, () => {
+expressapp.listen(80, () => {
   //console.log(`App listening on port ${PORT}`);
   console.log('Press Ctrl+C to quit.');
 });
