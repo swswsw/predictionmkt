@@ -70,7 +70,7 @@ for example of test invocation, please see test/testIntegrate2.js
 
 --------
 
-if you need to use curl to send a tx, you need to supply `from.pubkey`, `from.signature`, `from.sequence`, and `to`.  the format is as follows.
+if you need to if you need to send a transaction manually, you need to supply `from.pubkey`, `from.signature`, `from.sequence`, and `to`.  the format is as follows.
 > curl -X POST http://localhost:3000/txs -d '{"type": "verifySig", "from": { "pubkey": "rewlkjrlw", "signature": "rewlkajrlewk", "sequence": 0 }, "to": {} }'
 
 all of the tx will need `from` and `to`.  however, for brevity purpose, they are omitted in the following calls:
