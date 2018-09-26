@@ -64,7 +64,7 @@ run
 test invocation:
 
 it is possible to do test invocation using curl.  however, you will need to supply signature yourself.  
-it is recommended to use test/testCommon.js complexSendTx(), which will handle the signature, pubkey, and sequence.  
+it is recommended to use test/testCommon.js complexSendTx(), which will handle the signature, public key (pubkey), and sequence.  
 
 for example of test invocation, please see test/testIntegrate2.js
 
