@@ -116,23 +116,19 @@ format of start tx
     },
   },
 }
-
 format of bets
 {
 type: "bet",
 user: "alice", // should be an address
 amount: 100, // may allow multi token later
 outcome: 1, // user bets on outcome 1,2,3, or...
-
 }
-
 format of challenge
 {
   type: "challenge",
   user: "alice", // should be an address
   amount: 100,
 }
-
 format of vote
 {
   type: "vote",
@@ -140,7 +136,6 @@ format of vote
   amount: 1000,
   outcome: 1,
 }
-
 format of distribute
 {type: "distribute"}
 */
@@ -407,7 +402,7 @@ function txDistributeHandler(state, tx, chainInfo) {
       if (typeof checkValue !== "undefined") {
         let msg = "distribute cannot be invoked again";
         console.log(msg);
-        throw new Error(msg);
+        throw Error(msg);
       }
 
       // do final calculation and distribute the tokens accordingly.
@@ -761,7 +756,7 @@ function doPayout(voteOrBet, finalOutcome, bets, state, marketId) {
         if (!result) {
           Event.Trigger(keywords.eventKey, "transfer failed: " + payoutAmount + " to " + user);
           console.log("transfer failed");
-          throw new Error("transfer failed.");
+          throw Error("transfer failed.");
         } else {
           Event.Trigger(keywords.eventKey, "transfer result: " + JSON.stringify(result));
         }
@@ -873,8 +868,8 @@ const PUBKEY_SIZE = 0; // todo
  * 5.  
  */
 function checkTxCommon(tx) {
-  if (tx.type.length > MAX_TYPE_LENGTH) { throw new Error("type too long"); }
-  if (typeof tx.user !== "undefined" && tx.user.length > MAX_USER_LENGTH) { throw new Error("user too long"); }
+  if (tx.type.length > MAX_TYPE_LENGTH) { throw Error("type too long"); }
+  if (typeof tx.user !== "undefined" && tx.user.length > MAX_USER_LENGTH) { throw Error("user too long"); }
 }
 
 const MAX_START_INFO_LENGTH = 1024;
@@ -890,39 +885,32 @@ const MAX_START_INFO_LENGTH = 1024;
  */
 function checkStartInfo(startInfo) {
   let sStartInfo = JSON.stringify(startInfo);
-  if (sStartInfo > MAX_START_INFO_LENGTH) { throw new Error("startInfo too large"); }
-  if (typeof startInfo.oracle === "undefined") { throw new Error("startInfo.oracle is required"); }
-  if (!Array.isArray(startInfo.oracle)) { throw new Error("startInfo.oracle must be an array"); }
-  if (!startInfo.question) { throw new Error("startInfo.question is required"); }
-  if (!startInfo.outcomes) { throw new Error("startInfo.outcomes is required"); }
+  if (sStartInfo > MAX_START_INFO_LENGTH) { throw Error("startInfo too large"); }
+  if (typeof startInfo.oracle === "undefined") { throw Error("startInfo.oracle is required"); }
+  if (!Array.isArray(startInfo.oracle)) { throw Error("startInfo.oracle must be an array"); }
+  if (!startInfo.question) { throw Error("startInfo.question is required"); }
+  if (!startInfo.outcomes) { throw Error("startInfo.outcomes is required"); }
 }
 
 /*
-
 prediction market
-
-
 ** market phase **
 1. open new market
 2. allow bet
 3. someone bets (record them)
 4. market closes (by time)
-
 ** oracle phase **
 condition to enter phase: time
 10. get data from oracle
 11. determine the result and record it
 condition to end phase: time
-
 ** challenge phase **
 condition to enter phase: time, someone triggers it
 20. someone stake their coin and challenges
 condition to end phase: time
-
 ** vote phase **
 condition to enter phase: challenge phase completed
 30. anyone can stake their coin and vote
-
 ** distribute phase **
 condition to enter phase: time
 40. determine the final outcome
@@ -931,8 +919,6 @@ if (challenged)
   distributed the staked coins (in challenge and vote phase) according to votign results.
 distribute coins according to result
 condition to end phase: when everything in the phase is executed
-
-
 ** other info **
 time is not actual time.  it is block height
 */
